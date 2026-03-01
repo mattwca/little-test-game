@@ -36,19 +36,14 @@ public class LittleTestGame : Game
         cameraEntity.AddComponent(new CameraComponent(new Vector2(0, 0), 2f));
 
         var playerEntity = _systemManager.EntityManager.CreateEntity("player");
-        playerEntity.AddComponent(new RenderingComponent(Content.Load<Texture2D>("player"), new Vector2(100, 100), Color.White));
+        playerEntity.AddComponent(new PositionComponent(new Vector2(100, 100)));
+        playerEntity.AddComponent(new RenderingComponent(Content.Load<Texture2D>("player"), Color.White, layer: 2));
+        playerEntity.AddComponent(new RenderingComponent(Content.Load<Texture2D>("shadow"), new Color(255, 255, 255, 128), new Vector2(8, 24), 1, 0.5f));
         playerEntity.AddComponent(new PlayerComponent());
 
         var mapEntity = _systemManager.EntityManager.CreateEntity("map");
-        mapEntity.AddComponent(new TiledRenderingComponent(
-            Content.Load<Texture2D>("floorTile"),
-            new Vector2(0, 0),
-            Color.White,
-            32,
-            10,
-            10,
-            0
-        ));
+        mapEntity.AddComponent(new PositionComponent(new Vector2(0, 0)));
+        mapEntity.AddComponent(new TiledRenderingComponent(Content.Load<Texture2D>("floorTile"), 16, 20, 20, Color.White, new Vector2(0, 0), 0, 1f));
 
         _systemManager.AddSystem(new PlayerSystem());
         _systemManager.AddSystem(new TiledRenderingSystem(_spriteBatch));

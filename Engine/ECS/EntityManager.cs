@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace Engine.ECS;
@@ -24,5 +25,6 @@ public class EntityManager
 
     public List<Entity> GetEntitiesWithComponent<T>() where T : IComponent => Entities.FindAll((entity) => entity.HasComponent<T>());
 
+    public List<Entity> GetEntitiesWithComponents(params Type[] components) => Entities.FindAll((entity) => entity.HasComponents(components));
     public bool HasEntity(string id) => GetEntity(id) != null;
 }

@@ -20,17 +20,19 @@ public class TiledRenderingSystem : IRenderSystem
 
         _spriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: cameraComponent?.Transform);
 
-        var tiledRenderEntities = entityManager.GetEntitiesWithComponent<TiledRenderingComponent>();
+        var tiledRenderEntities = entityManager.GetEntitiesWithComponents(typeof(PositionComponent), typeof(TiledRenderingComponent));
 
         foreach (var entity in tiledRenderEntities)
         {
             var tiledRenderComponent = entity.GetComponent<TiledRenderingComponent>();
+            var positionComponent = entity.GetComponent<PositionComponent>();
 
             for (int x = 0; x < tiledRenderComponent.TilesX; x++)
             {
                 for (int y = 0; y < tiledRenderComponent.TilesY; y++)
                 {
-                    var tilePosition = tiledRenderComponent.Position + new Vector2(x * tiledRenderComponent.TileSize, y * tiledRenderComponent.TileSize);
+                    var worldPosition = positionComponent.Position + tiledRenderComponent.Offset;
+                    var tilePosition = worldPosition + new Vector2(x * tiledRenderComponent.TileSize, y * tiledRenderComponent.TileSize);
                     _spriteBatch.Draw(tiledRenderComponent.Texture, tilePosition, tiledRenderComponent.Colour);
                 }
             }

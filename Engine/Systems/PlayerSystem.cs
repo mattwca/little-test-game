@@ -11,7 +11,7 @@ public class PlayerSystem : IUpdateSystem
     public void Update(EntityManager entityManager, float deltaTime)
     {
         var playerEntity = entityManager.GetEntitiesWithComponent<PlayerComponent>().First();
-        var renderComponent = playerEntity.GetComponent<RenderingComponent>();
+        var positionComponent = playerEntity.GetComponent<PositionComponent>();
 
         var movementVector = new Vector2();
 
@@ -35,6 +35,6 @@ public class PlayerSystem : IUpdateSystem
             movementVector.X += 1;
         }
 
-        renderComponent.Position += movementVector * deltaTime * 100;
+        positionComponent.Position += movementVector * deltaTime * 100;
     }
 }
