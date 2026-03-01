@@ -6,8 +6,8 @@ public class SystemManager
 {
     public EntityManager EntityManager { get; }
 
-    private List<IUpdateSystem> _updateSystems;
-    private List<IRenderSystem> _renderSystems;
+    private readonly List<IUpdateSystem> _updateSystems;
+    private readonly List<IRenderSystem> _renderSystems;
 
     public SystemManager()
     {

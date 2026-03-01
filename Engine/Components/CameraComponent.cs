@@ -1,4 +1,5 @@
 using Engine.ECS;
+
 using Microsoft.Xna.Framework;
 
 namespace Engine.Components;

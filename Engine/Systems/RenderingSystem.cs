@@ -1,16 +1,18 @@
-using Engine.ECS;
-using Engine.Components;
 using System;
-using Microsoft.Xna.Framework.Graphics;
-using System.Linq;
 using System.ComponentModel;
+using System.Linq;
+
+using Engine.Components;
+using Engine.ECS;
+
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace Engine.Systems;
 
 public class RenderingSystem : IRenderSystem
 {
-    private SpriteBatch _spriteBatch;
+    private readonly SpriteBatch _spriteBatch;
 
     public RenderingSystem(SpriteBatch spriteBatch)
     {
@@ -36,7 +38,7 @@ public class RenderingSystem : IRenderSystem
 
                 _spriteBatch.Draw(
                     component.Texture,
-                    worldPosition, 
+                    worldPosition,
                     null,
                     component.Colour,
                     0f,

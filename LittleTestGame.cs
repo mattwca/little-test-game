@@ -1,16 +1,17 @@
 ﻿using Engine.Components;
 using Engine.ECS;
 using Engine.Systems;
+
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
 public class LittleTestGame : Game
 {
-    private GraphicsDeviceManager _graphics;
+    private readonly GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
 
-    private SystemManager _systemManager;
+    private readonly SystemManager _systemManager;
 
     public LittleTestGame()
     {

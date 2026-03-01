@@ -33,9 +33,10 @@ public class Entity
     public bool HasComponent<T>() where T : IComponent => _components.ContainsKey(typeof(T));
     public bool HasComponents(params Type[] components) => components.All(c => _components.ContainsKey(c));
 
-    public void RemoveComponent<T>(T component) where T : IComponent {
+    public void RemoveComponent<T>(T component) where T : IComponent
+    {
         var componentType = typeof(T);
-        
+
         if (!HasComponent<T>())
         {
             return;

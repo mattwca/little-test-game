@@ -1,12 +1,14 @@
 using System.Linq;
+
 using Engine.Components;
 using Engine.ECS;
+
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 public class TiledRenderingSystem : IRenderSystem
 {
-    private SpriteBatch _spriteBatch;
+    private readonly SpriteBatch _spriteBatch;
 
     public TiledRenderingSystem(SpriteBatch spriteBatch)
     {
