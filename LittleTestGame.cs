@@ -1,5 +1,6 @@
 ﻿using Engine.Components;
 using Engine.ECS;
+using Engine.Lighting;
 using Engine.Systems;
 
 using Microsoft.Xna.Framework;
@@ -33,6 +34,11 @@ public class LittleTestGame : Game
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
 
+        _systemManager
+            .Register(_spriteBatch)
+            .Register(GraphicsDevice)
+            .Register(Content);
+
         var cameraEntity = _systemManager.EntityManager.CreateEntity("camera");
         cameraEntity.AddComponent(new CameraComponent(new Vector2(0, 0), 2f));
 
@@ -46,9 +52,18 @@ public class LittleTestGame : Game
         mapEntity.AddComponent(new PositionComponent(new Vector2(0, 0)));
         mapEntity.AddComponent(new TiledRenderingComponent(Content.Load<Texture2D>("floorTile"), 16, 20, 20, Color.White, new Vector2(0, 0), 0, 1f));
 
-        _systemManager.AddSystem(new PlayerSystem());
-        _systemManager.AddSystem(new TiledRenderingSystem(_spriteBatch));
-        _systemManager.AddSystem(new RenderingSystem(_spriteBatch));
+        var lightEntity = _systemManager.EntityManager.CreateEntity("light");
+        lightEntity.AddComponent(new PositionComponent(new Vector2(150, 150)));
+        lightEntity.AddComponent(new LightComponent(Color.White, 100));
+        lightEntity.AddComponent(new RenderingComponent(Content.Load<Texture2D>("light"), Color.White));
+
+        _systemManager.AddSystem<PlayerSystem>();
+
+        var lightSystem = _systemManager.AddSystem<LightSystem>();
+        _systemManager.Register(lightSystem);
+
+        _systemManager.AddSystem<TiledRenderingSystem>();
+        _systemManager.AddSystem<RenderingSystem>();
     }
 
     protected override void Update(GameTime gameTime)

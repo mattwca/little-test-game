@@ -8,11 +8,16 @@ using Microsoft.Xna.Framework.Input;
 
 public class PlayerSystem : IUpdateSystem
 {
-    public PlayerSystem() { }
+    private readonly EntityManager _entityManager;
 
-    public void Update(EntityManager entityManager, float deltaTime)
+    public PlayerSystem(EntityManager entityManager)
     {
-        var playerEntity = entityManager.GetEntitiesWithComponent<PlayerComponent>().First();
+        _entityManager = entityManager;
+    }
+
+    public void Update(float deltaTime)
+    {
+        var playerEntity = _entityManager.GetEntitiesWithComponent<PlayerComponent>().First();
         var positionComponent = playerEntity.GetComponent<PositionComponent>();
 
         var movementVector = new Vector2();

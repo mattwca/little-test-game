@@ -1,8 +1,10 @@
 using Microsoft.Xna.Framework;
 
+using Engine.ECS;
+
 namespace Engine.Lighting;
 
-public class LightComponent
+public class LightComponent : IComponent
 {
     public Color Colour { get; set; }
     public float Intensity { get; set; }
@@ -12,4 +14,5 @@ public class LightComponent
         Colour = colour;
         Intensity = intensity;
     }
+
 }

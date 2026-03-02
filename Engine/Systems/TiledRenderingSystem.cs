@@ -8,21 +8,28 @@ using Microsoft.Xna.Framework.Graphics;
 
 public class TiledRenderingSystem : IRenderSystem
 {
+    private readonly GraphicsDevice _graphicsDevice;
     private readonly SpriteBatch _spriteBatch;
+    private readonly EntityManager _entityManager;
 
-    public TiledRenderingSystem(SpriteBatch spriteBatch)
+    public TiledRenderingSystem(GraphicsDevice graphicsDevice, SpriteBatch spriteBatch, EntityManager entityManager)
     {
+        _graphicsDevice = graphicsDevice;
         _spriteBatch = spriteBatch;
+        _entityManager = entityManager;
     }
 
-    public void Draw(EntityManager entityManager, float deltaTime)
+    public void Draw(float deltaTime)
     {
-        var cameraEntity = entityManager.GetEntitiesWithComponent<CameraComponent>().FirstOrDefault();
+        var cameraEntity = _entityManager.GetEntitiesWithComponent<CameraComponent>().FirstOrDefault();
         var cameraComponent = cameraEntity?.GetComponent<CameraComponent>();
+
+        _graphicsDevice.SetRenderTarget(null);
+        _graphicsDevice.Clear(Color.CornflowerBlue);
 
         _spriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: cameraComponent?.Transform);
 
-        var tiledRenderEntities = entityManager.GetEntitiesWithComponents(typeof(PositionComponent), typeof(TiledRenderingComponent));
+        var tiledRenderEntities = _entityManager.GetEntitiesWithComponents(typeof(PositionComponent), typeof(TiledRenderingComponent));
 
         foreach (var entity in tiledRenderEntities)
         {

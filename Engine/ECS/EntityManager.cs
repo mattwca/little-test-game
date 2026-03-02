@@ -23,8 +23,11 @@ public class EntityManager
 
     public Entity? GetEntity(string id) => Entities.Find(entity => entity.Id == id);
 
+    public Entity? GetEntityWithComponent<T>() where T : IComponent => Entities.Find((entity) => entity.HasComponent<T>());
+
     public List<Entity> GetEntitiesWithComponent<T>() where T : IComponent => Entities.FindAll((entity) => entity.HasComponent<T>());
 
     public List<Entity> GetEntitiesWithComponents(params Type[] components) => Entities.FindAll((entity) => entity.HasComponents(components));
+
     public bool HasEntity(string id) => GetEntity(id) != null;
 }

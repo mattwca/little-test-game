@@ -5,10 +5,17 @@ namespace Engine.Systems;
 
 public class AnimationSystem : IUpdateSystem
 {
-    public void Update(EntityManager entityManager, float deltaTime)
-    {
-        var entitiesWithAnimation = entityManager.GetEntitiesWithComponent<AnimationComponent>();
+    private readonly EntityManager _entityManager;
 
+    public AnimationSystem(EntityManager entityManager)
+    {
+        _entityManager = entityManager;
+    }
+
+    public void Update(float deltaTime)
+    {
+        var entitiesWithAnimation = _entityManager.GetEntitiesWithComponent<AnimationComponent>();
+        
         foreach (var entity in entitiesWithAnimation)
         {
             var animationComponent = entity.GetComponent<AnimationComponent>();

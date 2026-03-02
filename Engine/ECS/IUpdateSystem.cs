@@ -2,5 +2,5 @@ namespace Engine.ECS;
 
 public interface IUpdateSystem
 {
-    void Update(EntityManager entityManager, float deltaTime);
+    void Update(float deltaTime);
 }

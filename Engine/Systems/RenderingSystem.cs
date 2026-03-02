@@ -4,6 +4,7 @@ using System.Linq;
 
 using Engine.Components;
 using Engine.ECS;
+using Engine.Lighting;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -13,20 +14,28 @@ namespace Engine.Systems;
 public class RenderingSystem : IRenderSystem
 {
     private readonly SpriteBatch _spriteBatch;
+    private readonly EntityManager _entityManager;
+    private readonly LightSystem _lightSystem;
+    private readonly GraphicsDevice _graphicsDevice;
 
-    public RenderingSystem(SpriteBatch spriteBatch)
+    public RenderingSystem(GraphicsDevice graphicsDevice, SpriteBatch spriteBatch, EntityManager entityManager, LightSystem lightSystem)
     {
+        _graphicsDevice = graphicsDevice;
         _spriteBatch = spriteBatch;
+        _entityManager = entityManager;
+        _lightSystem = lightSystem;
     }
 
-    public void Draw(EntityManager entityManager, float deltaTime)
+    public void Draw(float deltaTime)
     {
-        var cameraEntity = entityManager.GetEntitiesWithComponent<CameraComponent>().FirstOrDefault();
+        var cameraEntity = _entityManager.GetEntitiesWithComponent<CameraComponent>().FirstOrDefault();
         var cameraComponent = cameraEntity?.GetComponent<CameraComponent>();
 
-        var entitiesToRender = entityManager.GetEntitiesWithComponents(typeof(RenderingComponent), typeof(PositionComponent));
+        var entitiesToRender = _entityManager.GetEntitiesWithComponents(typeof(RenderingComponent), typeof(PositionComponent));
 
         _spriteBatch.Begin(sortMode: SpriteSortMode.FrontToBack, samplerState: SamplerState.PointClamp, transformMatrix: cameraComponent?.Transform);
+
+        _spriteBatch.Draw(_lightSystem._shadowMapRenderTarget, Vector2.Zero, null, Color.White, 0f, Vector2.Zero, 2f, SpriteEffects.None, 0f);
 
         entitiesToRender.ForEach(entity =>
         {
@@ -45,7 +54,7 @@ public class RenderingSystem : IRenderSystem
                     scale: component.Scale,
                     layerDepth: component.Layer / 100f,
                     origin: Vector2.Zero,
-                    effects: SpriteEffects.None
+                    effects: (component.FlipX ? SpriteEffects.FlipHorizontally : SpriteEffects.None) | (component.FlipY ? SpriteEffects.FlipVertically : SpriteEffects.None)
                 );
             }
         });
