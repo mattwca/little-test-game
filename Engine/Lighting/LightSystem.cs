@@ -36,7 +36,7 @@ public class LightSystem : IRenderSystem, IUpdateSystem
         _shadowMapRenderTarget = new RenderTarget2D(
             _graphicsDevice,
             512,
-            512
+            1
         );
 
         _shadowMapEffect = _contentManager.Load<Effect>("Effects/ShadowMapEffect");
@@ -48,12 +48,9 @@ public class LightSystem : IRenderSystem, IUpdateSystem
         if (lightEntity == null)
             return;
 
-        var lightComponent = lightEntity.GetComponent<LightComponent>();
-        var positionComponent = lightEntity.GetComponent<PositionComponent>();
-
         // Update the light texture render target
-        RenderLightTexture();
-        RenderShadowMap();
+        RenderLightTexture(lightEntity);
+        RenderShadowMap(lightEntity.GetComponent<PositionComponent>());
     }
 
     public void Update(float deltaTime)
@@ -61,44 +58,57 @@ public class LightSystem : IRenderSystem, IUpdateSystem
         // TODO
     }
 
-    private void RenderLightTexture()
+    private void RenderLightTexture(Entity lightEntity)
     {
         var cameraEntity = _entityManager.GetEntityWithComponent<CameraComponent>();
         var cameraComponent = cameraEntity!.GetComponent<CameraComponent>();
 
         _graphicsDevice.SetRenderTarget(_lightRenderTarget);
         _graphicsDevice.Clear(Color.Transparent);
-        _spriteBatch.Begin(blendState: BlendState.Additive, transformMatrix: cameraComponent.Transform);
+        _spriteBatch.Begin(sortMode: SpriteSortMode.FrontToBack, samplerState: SamplerState.PointClamp, transformMatrix: cameraComponent?.Transform);
 
         var entitiesToRender = _entityManager.GetEntitiesWithComponents(typeof(RenderingComponent), typeof(PositionComponent));
-        foreach (var entity in entitiesToRender)
-        {
-            var position = entity.GetComponent<PositionComponent>();
-            var sprite = entity.GetComponent<RenderingComponent>();
 
-            _spriteBatch.Draw(
-                sprite.Texture,
-                position.Position,
-                null,
-                Color.White,
-                0f,
-                Vector2.Zero,
-                sprite.Scale,
-                SpriteEffects.None,
-                sprite.Layer
-            );
+        if (entitiesToRender.Contains(lightEntity))
+        {
+            entitiesToRender.Remove(lightEntity);
         }
+
+        entitiesToRender.ForEach(entity =>
+        {
+            var positionComponent = entity.GetComponent<PositionComponent>();
+            var renderingComponents = entity.GetComponents<RenderingComponent>();
+            foreach (var component in renderingComponents)
+            {
+                var worldPosition = positionComponent.Position + component.Offset;
+
+                _spriteBatch.Draw(
+                    component.Texture,
+                    worldPosition,
+                    null,
+                    component.Colour,
+                    0f,
+                    scale: component.Scale,
+                    layerDepth: component.Layer / 100f,
+                    origin: Vector2.Zero,
+                    effects: (component.FlipX ? SpriteEffects.FlipHorizontally : SpriteEffects.None) | (component.FlipY ? SpriteEffects.FlipVertically : SpriteEffects.None)
+                );
+            }
+        });
 
         _spriteBatch.End();
         _graphicsDevice.SetRenderTarget(null);
     }
 
-    private void RenderShadowMap()
+    private void RenderShadowMap(PositionComponent lightPosition)
     {
+        _shadowMapEffect.Parameters["LightPosition"].SetValue(lightPosition.Position);
+        _shadowMapEffect.Parameters["Resolution"].SetValue(new Vector2(_graphicsDevice.Viewport.Width, _graphicsDevice.Viewport.Height));
+
         _graphicsDevice.SetRenderTarget(_shadowMapRenderTarget);
         _graphicsDevice.Clear(Color.White);
 
-        _spriteBatch.Begin(effect: _shadowMapEffect);
+        _spriteBatch.Begin(SpriteSortMode.Immediate, effect: _shadowMapEffect);
         _spriteBatch.Draw(_lightRenderTarget, Vector2.Zero, Color.White);
         _spriteBatch.End();
 
