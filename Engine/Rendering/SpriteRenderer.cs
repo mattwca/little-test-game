@@ -32,13 +32,12 @@ public class SpriteRenderer
         _spriteEffect = _contentManager.Load<Effect>("Effects/SpriteEffect");
     }
 
-    public void RenderSprites(Func<Entity, bool>? entityFilter = null)
+    public void RenderSprites(Func<RenderingComponent, bool>? filter = null)
     {
         var cameraTransform = _helprer.GetCameraTransform();
 
         var entitiesToRender = _entityManager
             .GetEntitiesWithComponents(typeof(PositionComponent), typeof(RenderingComponent))
-            .Where((entity) => entityFilter == null || entityFilter(entity))
             .SelectMany(
                 (entity) =>
                 {
@@ -51,7 +50,8 @@ public class SpriteRenderer
                         renderingComponent
                     ));
                 }
-            );
+            )
+            .Where((components) => filter == null ? true : filter(components.renderingComponent));
 
         _spriteBatch.Begin(sortMode: SpriteSortMode.FrontToBack, samplerState: SamplerState.PointClamp, transformMatrix: cameraTransform, effect: _spriteEffect);
 

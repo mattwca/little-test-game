@@ -74,13 +74,13 @@ public class LightSystem : IRenderSystem, IUpdateSystem
 
     public void Update(float deltaTime)
     {
-        var lightEntity = _entityManager.GetEntityWithComponent<LightComponent>()!;
-        var lightComponent = lightEntity.GetComponent<LightComponent>();
-        var renderingComponent = lightEntity.GetComponent<RenderingComponent>();
+        // var lightEntity = _entityManager.GetEntityWithComponent<LightComponent>()!;
+        // var lightComponent = lightEntity.GetComponent<LightComponent>();
+        // var renderingComponent = lightEntity.GetComponent<RenderingComponent>();
 
-        var colour = _colourGenerator.GetCyclingColor(deltaTime);
-        lightComponent.Colour = colour;
-        renderingComponent.Colour = colour;
+        // var colour = _colourGenerator.GetCyclingColor(deltaTime);
+        // lightComponent.Colour = colour;
+        // renderingComponent.Colour = colour;
     }
 
     private void RenderOccluders()
@@ -88,10 +88,9 @@ public class LightSystem : IRenderSystem, IUpdateSystem
         _graphicsDevice.WithRenderTarget(_occluderTexture, () =>
         {
             _graphicsDevice.Clear(Color.Transparent);
-            _spriteRenderer.RenderSprites((entity) =>
+            _spriteRenderer.RenderSprites((renderComponent) =>
             {
-                var renderingComponent = entity.GetComponent<RenderingComponent>();
-                return renderingComponent.CastsShadow;
+                return renderComponent.CastsShadow;
             });
         });
     }

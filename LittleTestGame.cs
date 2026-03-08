@@ -47,26 +47,26 @@ public class LittleTestGame : Game
 
         _systemManager.Register(_systemManager.Construct<Helper>());
 
-        var cameraEntity = _systemManager.EntityManager
+        _systemManager.EntityManager
             .CreateEntity("camera")
-            .AddComponent(new CameraComponent(new Vector2(0, 0), 1.5f));
+            .AddComponent(new CameraComponent(new Vector2(0, 0), 1.0f));
 
         _systemManager.EntityManager
             .CreateEntity("map")
             .AddComponent(new PositionComponent(new Vector2(0, 0)))
-            .AddComponent(new TiledRenderingComponent(Content.Load<Texture2D>("floorTile"), 16, 100, 100, Color.White, new Vector2(0, 0), 0, 1f));
+            .AddComponent(new TiledRenderingComponent(Content.Load<Texture2D>("floorTile"), 32, 100, 100, Color.White, new Vector2(0, 0), 0, 1f));
 
         _systemManager.EntityManager
             .CreateEntity("light")
             .AddComponent(new PositionComponent(new Vector2(150, 150), 32, 32))
-            .AddComponent(new LightComponent(Color.White, 100))
+            .AddComponent(new LightComponent(Color.Gold, 100))
             .AddComponent(new RenderingComponent(Content.Load<Texture2D>("light"), Color.White, castsShadow: false));
 
         _systemManager.EntityManager
             .CreateEntity("player")
             .AddComponent(new PositionComponent(new Vector2(150, 50), 32, 32))
             .AddComponent(new RenderingComponent(Content.Load<Texture2D>("player"), Color.White, layer: 2, castsShadow: true))
-            .AddComponent(new RenderingComponent(Content.Load<Texture2D>("shadow"), new Color(255, 255, 255, 128), new Vector2(8, 24), layer: 50, 0.5f, castsShadow: true))
+            .AddComponent(new RenderingComponent(Content.Load<Texture2D>("shadow"), new Color(255, 255, 255, 128), new Vector2(8, 24), layer: 1, 0.5f, castsShadow: false))
             .AddComponent(new PlayerComponent());
 
         _systemManager.EntityManager
