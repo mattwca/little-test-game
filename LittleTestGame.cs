@@ -1,6 +1,7 @@
 ﻿using Engine.Components;
 using Engine.ECS;
 using Engine.Lighting;
+using Engine.Rendering;
 using Engine.Systems;
 
 using Microsoft.Xna.Framework;
@@ -75,7 +76,6 @@ public class LittleTestGame : Game
         wall2Entity.AddComponent(new RenderingComponent(Content.Load<Texture2D>("wall"), Color.White, offset: new Vector2(0, -32)));
         wall2Entity.AddComponent(new RenderingComponent(Content.Load<Texture2D>("wall"), Color.White, offset: new Vector2(0, -64)));
 
-
         var wall3Entity = _systemManager.EntityManager.CreateEntity("wall3");
         wall3Entity.AddComponent(new PositionComponent(new Vector2(200, 100), 32, 32));
         wall3Entity.AddComponent(new RenderingComponent(Content.Load<Texture2D>("wall"), Color.White, layer: 1));
@@ -102,6 +102,8 @@ public class LittleTestGame : Game
         var lightSystem = _systemManager.AddSystem<LightSystem>();
         _systemManager.Register(lightSystem);
 
+        _systemManager.Register(_systemManager.Construct<SpriteRenderer>());
+        _systemManager.Register(_systemManager.Construct<TileRenderer>());
         _systemManager.AddSystem<RenderingSystem>();
     }
 

@@ -1,7 +1,9 @@
+using System.Collections.Generic;
 using System.Linq;
 
 using Engine.Components;
 using Engine.ECS;
+using Engine.Utils;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
@@ -16,20 +18,13 @@ public class LightSystem : IRenderSystem, IUpdateSystem
     private readonly GraphicsDevice _graphicsDevice;
     private readonly SpriteBatch _spriteBatch;
 
+    private readonly LinearColourGenerator _colourGenerator;
+
+    private readonly Dictionary<string, RenderTarget2D> _shadowMaps;
+
     private readonly RenderTarget2D _lightRenderTarget;
     public readonly RenderTarget2D _shadowMapRenderTarget;
     private readonly Effect _shadowMapEffect;
-
-    private float _t = 0f;
-    private readonly Color[] _colors = 
-    [
-        Color.Red,
-        Color.Orange,
-        Color.Yellow,
-        Color.Green,
-        Color.Blue,
-        Color.Purple,
-    ];
 
     public LightSystem(EntityManager entityManager, ContentManager contentManager, GraphicsDevice graphicsDevice, SpriteBatch spriteBatch)
     {
@@ -38,30 +33,23 @@ public class LightSystem : IRenderSystem, IUpdateSystem
         _graphicsDevice = graphicsDevice;
         _spriteBatch = spriteBatch;
 
+        _colourGenerator = new LinearColourGenerator(LinearColourGenerator.DefaultColours);
+
+        _shadowMaps = new Dictionary<string, RenderTarget2D>();
+
         _lightRenderTarget = new RenderTarget2D(
             _graphicsDevice,
             _graphicsDevice.PresentationParameters.BackBufferWidth,
             _graphicsDevice.PresentationParameters.BackBufferHeight
         );
 
-        _shadowMapRenderTarget = new RenderTarget2D(
-            _graphicsDevice,
-            512,
-            1
-        );
+        // _shadowMapRenderTarget = new RenderTarget2D(
+        //     _graphicsDevice,
+        //     512,
+        //     1
+        // );
 
         _shadowMapEffect = _contentManager.Load<Effect>("Effects/ShadowMapEffect");
-    }
-
-    private Color GetCyclingColor(float deltaTime, float speed = 0.5f)
-    {
-        _t = (_t + deltaTime * speed) % _colors.Length;
-
-        int fromIndex = (int)_t;
-        int toIndex = (fromIndex + 1) % _colors.Length;
-        float blend = _t - fromIndex;
-
-        return Color.Lerp(_colors[fromIndex], _colors[toIndex], blend);
     }
 
     public void Draw(float deltaTime)
@@ -83,7 +71,7 @@ public class LightSystem : IRenderSystem, IUpdateSystem
         var lightComponent = lightEntity.GetComponent<LightComponent>();
         var renderingComponent = lightEntity.GetComponent<RenderingComponent>();
 
-        var colour = GetCyclingColor(deltaTime);
+        var colour = _colourGenerator.GetCyclingColor(deltaTime);
         lightComponent.Colour = colour;
         renderingComponent.Colour = colour;
     }
