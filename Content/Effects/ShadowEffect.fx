@@ -30,7 +30,7 @@ float4 ShadowPixelShader(float4 color : COLOR0, float2 texCoord : TEXCOORD0) : C
     
     // If the rendered frame has a non-transparent pixel, and we're further away than the encoded distance,
     // we render a shadow.
-    if (colour.a < 1 && distanceToLight > shadowMapValue) {
+    if (colour.a < 0.1 && distanceToLight > shadowMapValue) {
         float4 shadowColour = float4(0.25, 0.25, 0.25, distanceToLight + 0.5) * LightColour;
         
         float brightness = (shadowColour.r + shadowColour.g + shadowColour.b) / 2.0;

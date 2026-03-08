@@ -3,6 +3,7 @@ using System.Linq;
 
 using Engine.Components;
 using Engine.ECS;
+using Engine.Utils;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
@@ -16,37 +17,43 @@ public class SpriteRenderer
     private readonly GraphicsDevice _graphicsDevice;
     private readonly EntityManager _entityManager;
     private readonly SpriteBatch _spriteBatch;
+    private readonly Helper _helprer;
 
     private readonly Effect _spriteEffect;
 
-    public SpriteRenderer(ContentManager contentManager, GraphicsDevice graphicsDevice, EntityManager entityManager, SpriteBatch spriteBatch)
+    public SpriteRenderer(ContentManager contentManager, GraphicsDevice graphicsDevice, EntityManager entityManager, SpriteBatch spriteBatch, Helper helper)
     {
         _contentManager = contentManager;
         _graphicsDevice = graphicsDevice;
         _entityManager = entityManager;
         _spriteBatch = spriteBatch;
+        _helprer = helper;
 
         _spriteEffect = _contentManager.Load<Effect>("Effects/SpriteEffect");
     }
 
-    public void RenderSprites()
+    public void RenderSprites(Func<Entity, bool>? entityFilter = null)
     {
-        var cameraTransform = GetCameraTransform();
-        var entitiesToRender = _entityManager.GetEntitiesWithComponents(typeof(RenderingComponent), typeof(PositionComponent)).SelectMany(
-            (entity) =>
-            {
-                var positionComponent = entity.GetComponent<PositionComponent>();
-                var renderingComponents = entity.GetComponents<RenderingComponent>();
+        var cameraTransform = _helprer.GetCameraTransform();
 
-                return renderingComponents.Select((renderingComponent) =>
-                (
-                    positionComponent,
-                    renderingComponent
-                ));
-            }
-        );
+        var entitiesToRender = _entityManager
+            .GetEntitiesWithComponents(typeof(PositionComponent), typeof(RenderingComponent))
+            .Where((entity) => entityFilter == null || entityFilter(entity))
+            .SelectMany(
+                (entity) =>
+                {
+                    var positionComponent = entity.GetComponent<PositionComponent>();
+                    var renderingComponents = entity.GetComponents<RenderingComponent>();
 
-        _spriteBatch.Begin(sortMode: SpriteSortMode.BackToFront, samplerState: SamplerState.PointClamp, transformMatrix: cameraTransform, effect: _spriteEffect);
+                    return renderingComponents.Select((renderingComponent) =>
+                    (
+                        positionComponent,
+                        renderingComponent
+                    ));
+                }
+            );
+
+        _spriteBatch.Begin(sortMode: SpriteSortMode.FrontToBack, samplerState: SamplerState.PointClamp, transformMatrix: cameraTransform, effect: _spriteEffect);
 
         foreach (var (positionComponent, renderingComponent) in entitiesToRender)
         {
@@ -69,10 +76,4 @@ public class SpriteRenderer
         _spriteBatch.End();
     }
 
-    private Matrix GetCameraTransform()
-    {
-        var cameraEntity = _entityManager.GetEntityWithComponent<CameraComponent>()!;
-        var cameraComponent = cameraEntity.GetComponent<CameraComponent>();
-        return cameraComponent.Transform;
-    }
 }

@@ -14,8 +14,9 @@ public class RenderingComponent : IComponent
     public float Scale { get; set; }
     public bool FlipX { get; set; }
     public bool FlipY { get; set; }
+    public bool CastsShadow { get; set; }
 
-    public RenderingComponent(Texture2D texture, Color colour = default, Vector2 offset = default, int layer = 0, float scale = 1f, bool flipX = false, bool flipY = false)
+    public RenderingComponent(Texture2D texture, Color colour = default, Vector2 offset = default, int layer = 0, float scale = 1f, bool flipX = false, bool flipY = false, bool castsShadow = true)
     {
         Texture = texture;
         Colour = colour;
@@ -24,5 +25,6 @@ public class RenderingComponent : IComponent
         Scale = scale;
         FlipX = flipX;
         FlipY = flipY;
+        CastsShadow = castsShadow;
     }
 }

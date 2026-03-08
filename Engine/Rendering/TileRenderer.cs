@@ -1,20 +1,22 @@
 using Engine.Components;
 using Engine.ECS;
+using Engine.Utils;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace Engine.Rendering;
 
-public class TileRenderer(EntityManager entityManager, GraphicsDevice graphicsDevice, SpriteBatch spriteBatch)
+public class TileRenderer(EntityManager entityManager, GraphicsDevice graphicsDevice, SpriteBatch spriteBatch, Helper helper)
 {
     private readonly EntityManager _entityManager = entityManager;
     private readonly GraphicsDevice _graphicsDevice = graphicsDevice;
     private readonly SpriteBatch _spriteBatch = spriteBatch;
+    private readonly Helper _helper = helper;
 
     public void RenderTiles()
     {
-        var cameraTransform = GetCameraTransform();
+        var cameraTransform = _helper.GetCameraTransform();
         _spriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: cameraTransform);
 
         var tiledRenderEntities = _entityManager.GetEntitiesWithComponents(typeof(PositionComponent), typeof(TiledRenderingComponent));
@@ -36,12 +38,5 @@ public class TileRenderer(EntityManager entityManager, GraphicsDevice graphicsDe
         }
 
         _spriteBatch.End();
-    }
-    
-    private Matrix GetCameraTransform()
-    {
-        var cameraEntity = _entityManager.GetEntityWithComponent<CameraComponent>()!;
-        var cameraComponent = cameraEntity.GetComponent<CameraComponent>();
-        return cameraComponent.Transform;
     }
 }

@@ -17,17 +17,18 @@ public class Entity
         _components = new Dictionary<Type, List<IComponent>>();
     }
 
-    public void AddComponent<T>(T component) where T : IComponent
+    public Entity AddComponent<T>(T component) where T : IComponent
     {
         var componentType = typeof(T);
 
         if (_components.ContainsKey(componentType))
         {
             _components[componentType].Add(component);
-            return;
+            return this;
         }
 
         _components[componentType] = [component];
+        return this;
     }
 
     public bool HasComponent<T>() where T : IComponent => _components.ContainsKey(typeof(T));
