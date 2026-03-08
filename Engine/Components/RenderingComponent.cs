@@ -8,7 +8,7 @@ namespace Engine.Components;
 public class RenderingComponent : IComponent
 {
     public Texture2D Texture { get; }
-    public Color Colour { get; }
+    public Color Colour { get; set; }
     public Vector2 Offset { get; set; }
     public int Layer { get; }
     public float Scale { get; set; }

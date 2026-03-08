@@ -13,11 +13,23 @@
 
 #---------------------------------- Content ---------------------------------#
 
+#begin Effects/ShadowEffect.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:Effects/ShadowEffect.fx
+
 #begin Effects/ShadowMapEffect.fx
 /importer:EffectImporter
 /processor:EffectProcessor
 /processorParam:DebugMode=Auto
 /build:Effects/ShadowMapEffect.fx
+
+#begin Effects/SpriteEffect.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:Effects/SpriteEffect.fx
 
 #begin floorTile.png
 /importer:TextureImporter
@@ -66,4 +78,16 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:shadow.png
+
+#begin wall.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:wall.png
 

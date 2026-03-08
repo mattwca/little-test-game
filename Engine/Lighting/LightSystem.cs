@@ -20,6 +20,17 @@ public class LightSystem : IRenderSystem, IUpdateSystem
     public readonly RenderTarget2D _shadowMapRenderTarget;
     private readonly Effect _shadowMapEffect;
 
+    private float _t = 0f;
+    private readonly Color[] _colors = 
+    [
+        Color.Red,
+        Color.Orange,
+        Color.Yellow,
+        Color.Green,
+        Color.Blue,
+        Color.Purple,
+    ];
+
     public LightSystem(EntityManager entityManager, ContentManager contentManager, GraphicsDevice graphicsDevice, SpriteBatch spriteBatch)
     {
         _entityManager = entityManager;
@@ -42,6 +53,17 @@ public class LightSystem : IRenderSystem, IUpdateSystem
         _shadowMapEffect = _contentManager.Load<Effect>("Effects/ShadowMapEffect");
     }
 
+    private Color GetCyclingColor(float deltaTime, float speed = 0.5f)
+    {
+        _t = (_t + deltaTime * speed) % _colors.Length;
+
+        int fromIndex = (int)_t;
+        int toIndex = (fromIndex + 1) % _colors.Length;
+        float blend = _t - fromIndex;
+
+        return Color.Lerp(_colors[fromIndex], _colors[toIndex], blend);
+    }
+
     public void Draw(float deltaTime)
     {
         var lightEntity = _entityManager.GetEntitiesWithComponents(typeof(LightComponent), typeof(PositionComponent)).FirstOrDefault();
@@ -56,6 +78,14 @@ public class LightSystem : IRenderSystem, IUpdateSystem
     public void Update(float deltaTime)
     {
         // TODO
+
+        var lightEntity = _entityManager.GetEntityWithComponent<LightComponent>()!;
+        var lightComponent = lightEntity.GetComponent<LightComponent>();
+        var renderingComponent = lightEntity.GetComponent<RenderingComponent>();
+
+        var colour = GetCyclingColor(deltaTime);
+        lightComponent.Colour = colour;
+        renderingComponent.Colour = colour;
     }
 
     private void RenderLightTexture(Entity lightEntity)
@@ -102,14 +132,17 @@ public class LightSystem : IRenderSystem, IUpdateSystem
 
     private void RenderShadowMap(PositionComponent lightPosition)
     {
-        _shadowMapEffect.Parameters["LightPosition"].SetValue(lightPosition.Position);
+        var cameraEntity = _entityManager.GetEntitiesWithComponent<CameraComponent>().FirstOrDefault();
+        var cameraComponent = cameraEntity?.GetComponent<CameraComponent>();
+
+        _shadowMapEffect.Parameters["LightPosition"].SetValue(Vector2.Transform(lightPosition.Centre, cameraComponent!.Transform));
         _shadowMapEffect.Parameters["Resolution"].SetValue(new Vector2(_graphicsDevice.Viewport.Width, _graphicsDevice.Viewport.Height));
 
         _graphicsDevice.SetRenderTarget(_shadowMapRenderTarget);
         _graphicsDevice.Clear(Color.White);
 
         _spriteBatch.Begin(SpriteSortMode.Immediate, effect: _shadowMapEffect);
-        _spriteBatch.Draw(_lightRenderTarget, Vector2.Zero, Color.White);
+        _spriteBatch.Draw(_lightRenderTarget, new Rectangle(0, 0, _graphicsDevice.Viewport.Width, _graphicsDevice.Viewport.Height), Color.White);
         _spriteBatch.End();
 
         _graphicsDevice.SetRenderTarget(null);
