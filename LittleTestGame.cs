@@ -49,7 +49,7 @@ public class LittleTestGame : Game
 
         _systemManager.EntityManager
             .CreateEntity("camera")
-            .AddComponent(new CameraComponent(new Vector2(0, 0), 1.0f));
+            .AddComponent(new CameraComponent(new Vector2(0, 0), 2f));
 
         _systemManager.EntityManager
             .CreateEntity("map")

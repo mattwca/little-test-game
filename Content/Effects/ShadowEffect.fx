@@ -10,11 +10,17 @@ float4 ShadowPixelShader(float4 color : COLOR0, float2 texCoord : TEXCOORD0) : C
     // Convert the light position from pixel space to uv space (0-1).
     float2 lightPositionUV = LightPosition / ScreenSize;
 
+    // Work in aspect-ratio-corrected UV space so distances and angles match the shadow map,
+    // and the light boundary is a circle in pixel space rather than an ellipse.
+    float aspectRatio = ScreenSize.x / ScreenSize.y;
+    float2 texCoordCorrected = float2(texCoord.x * aspectRatio, texCoord.y);
+    float2 lightPosCorrected = float2(lightPositionUV.x * aspectRatio, lightPositionUV.y);
+
     // Calculate the distance from the given position to the light.
-    float distanceToLight = distance(texCoord, lightPositionUV);
+    float distanceToLight = distance(texCoordCorrected, lightPosCorrected);
 
     // Get the direction and angle from the pixel to the light.
-    float2 direction = texCoord - lightPositionUV;
+    float2 direction = texCoordCorrected - lightPosCorrected;
     float angle = atan2(direction.y, direction.x);
 
     // Convert back from the angle to the corresponding X co-ordinate we would have used for the distance
@@ -28,14 +34,12 @@ float4 ShadowPixelShader(float4 color : COLOR0, float2 texCoord : TEXCOORD0) : C
     // Get the colour from the rendered frame.
     float4 colour = tex2D(Texture, texCoord) * color;
     
+    float bias = 0.031;
+
     // If the rendered frame contains a transparent pixel at this position, and we're further away than the encoded
     // distance, we render a shadow.
-    if (colour.a < 1 && distanceToLight > shadowMapValue || distanceToLight > 0.2) {
-        float4 shadowColour = float4(0.25, 0.25, 0.25, distanceToLight + 0.5) * LightColour;
-        
-        float brightness = (shadowColour.r + shadowColour.g + shadowColour.b) / 2.0;
-        float4 gray = float4(brightness, brightness, brightness, shadowColour.a);
-        return lerp(shadowColour, gray, 0.4);
+    if (distanceToLight > shadowMapValue + bias) {
+        return lerp(colour, float4(0.25, 0.25, 0.25, 1), clamp(pow(distanceToLight, 2), 0, 1)) * LightColour;
     }
 
     return colour;
