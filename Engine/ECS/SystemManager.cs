@@ -58,6 +58,8 @@ public class SystemManager
             _renderSystems.Add(renderSystem);
         }
 
+        Register(system);
+
         return system;
     }
 

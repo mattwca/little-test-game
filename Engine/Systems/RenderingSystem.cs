@@ -52,23 +52,26 @@ public class RenderingSystem : IRenderSystem
         });
 
         _tileRenderer.RenderTiles();
-        RenderShadowPass();
+
+        var visibleLights = _lightSystem.GetVisibleLights();
+        foreach (var visibleLight in visibleLights) {
+            RenderShadowPass(visibleLight);
+        }
     }
 
-    private void RenderShadowPass()
+    private void RenderShadowPass(Entity lightEntity)
     {
-        var lightEntity = _entityManager.GetEntityWithComponent<LightComponent>()!;
-        var lightPosition = lightEntity.GetComponent<PositionComponent>().Centre;
+        var lightPositionComponent = lightEntity.GetComponent<PositionComponent>();
         var lightComponent = lightEntity.GetComponent<LightComponent>();
+        var shadowMap = _lightSystem.ShadowMaps[lightEntity.Id];
 
         var screenSize = new Vector2(_graphicsDevice.Viewport.Width, _graphicsDevice.Viewport.Height);
-
         var cameraTransform = _helper.GetCameraTransform();
 
-        _shadowEffect.Parameters["LightPosition"].SetValue(Vector2.Transform(lightPosition, cameraTransform));
+        _shadowEffect.Parameters["LightPosition"].SetValue(Vector2.Transform(lightPositionComponent.Centre, cameraTransform));
         _shadowEffect.Parameters["LightColour"].SetValue(lightComponent.Colour.ToVector4());
         _shadowEffect.Parameters["ScreenSize"].SetValue(screenSize);
-        _shadowEffect.Parameters["ShadowMap"].SetValue(_lightSystem._shadowMapRenderTarget);
+        _shadowEffect.Parameters["ShadowMap"].SetValue(shadowMap);
 
         _spriteBatch.Begin(effect: _shadowEffect);
         _spriteBatch.Draw(_renderedFrame, new Rectangle(0, 0, _graphicsDevice.Viewport.Width, _graphicsDevice.Viewport.Height), Color.White);

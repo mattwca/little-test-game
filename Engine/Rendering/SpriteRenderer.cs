@@ -37,7 +37,8 @@ public class SpriteRenderer
         var cameraTransform = _helprer.GetCameraTransform();
 
         var entitiesToRender = _entityManager
-            .GetEntitiesWithComponents(typeof(PositionComponent), typeof(RenderingComponent))
+            .GetEntitiesWithComponents(typeof(PositionComponent), typeof(RenderingComponent), typeof(VisibilityComponent))
+            .Where((entity) => entity.GetComponent<VisibilityComponent>().IsVisible)
             .SelectMany(
                 (entity) =>
                 {

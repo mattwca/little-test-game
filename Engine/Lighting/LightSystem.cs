@@ -21,13 +21,10 @@ public class LightSystem : IRenderSystem, IUpdateSystem
     private readonly SpriteRenderer _spriteRenderer;
 
 
-    private readonly LinearColourGenerator _colourGenerator;
-
-    private readonly Dictionary<string, RenderTarget2D> _shadowMaps;
-
     private readonly RenderTarget2D _occluderTexture;
-    public readonly RenderTarget2D _shadowMapRenderTarget;
     private readonly Effect _shadowMapEffect;
+
+    public Dictionary<string, RenderTarget2D> ShadowMaps { get; }
 
     public LightSystem(
         EntityManager entityManager,
@@ -35,16 +32,15 @@ public class LightSystem : IRenderSystem, IUpdateSystem
         GraphicsDevice graphicsDevice,
         SpriteBatch spriteBatch,
         SpriteRenderer spriteRenderer
-    ) {
+    )
+    {
         _entityManager = entityManager;
         _contentManager = contentManager;
         _graphicsDevice = graphicsDevice;
         _spriteBatch = spriteBatch;
         _spriteRenderer = spriteRenderer;
 
-        _colourGenerator = new LinearColourGenerator(LinearColourGenerator.DefaultColours);
-
-        _shadowMaps = new Dictionary<string, RenderTarget2D>();
+        ShadowMaps = new Dictionary<string, RenderTarget2D>();
 
         _occluderTexture = new RenderTarget2D(
             _graphicsDevice,
@@ -52,24 +48,26 @@ public class LightSystem : IRenderSystem, IUpdateSystem
             _graphicsDevice.PresentationParameters.BackBufferHeight
         );
 
-        _shadowMapRenderTarget = new RenderTarget2D(
-            _graphicsDevice,
-            512,
-            1
-        );
-
         _shadowMapEffect = _contentManager.Load<Effect>("Effects/ShadowMapEffect");
+    }
+
+    public Entity[] GetVisibleLights()
+    {
+        var lights = _entityManager.GetEntitiesWithComponents(typeof(LightComponent), typeof(PositionComponent), typeof(VisibilityComponent));
+        return lights.Where((light) => light.GetComponent<VisibilityComponent>().IsVisible).ToArray();
     }
 
     public void Draw(float deltaTime)
     {
-        var lightEntity = _entityManager.GetEntitiesWithComponents(typeof(LightComponent), typeof(PositionComponent)).FirstOrDefault();
-        if (lightEntity == null)
-            return;
-
         // Update the light texture render target
         RenderOccluders();
-        RenderShadowMap(lightEntity.GetComponent<PositionComponent>());
+        
+        var visibleLights = GetVisibleLights();
+        foreach (var light in visibleLights)
+        {
+            var positionComponent = light.GetComponent<PositionComponent>();
+            RenderShadowMap(light.Id, positionComponent);
+        }
     }
 
     public void Update(float deltaTime)
@@ -95,7 +93,7 @@ public class LightSystem : IRenderSystem, IUpdateSystem
         });
     }
 
-    private void RenderShadowMap(PositionComponent lightPosition)
+    private void RenderShadowMap(string entityId, PositionComponent lightPosition)
     {
         var cameraEntity = _entityManager.GetEntitiesWithComponent<CameraComponent>().FirstOrDefault();
         var cameraComponent = cameraEntity?.GetComponent<CameraComponent>();
@@ -103,7 +101,12 @@ public class LightSystem : IRenderSystem, IUpdateSystem
         _shadowMapEffect.Parameters["LightPosition"].SetValue(Vector2.Transform(lightPosition.Centre, cameraComponent!.Transform));
         _shadowMapEffect.Parameters["Resolution"].SetValue(new Vector2(_graphicsDevice.Viewport.Width, _graphicsDevice.Viewport.Height));
 
-        _graphicsDevice.SetRenderTarget(_shadowMapRenderTarget);
+        if (!ShadowMaps.ContainsKey(entityId))
+        {
+            ShadowMaps.Add(entityId, CreateShadowMap());
+        }
+
+        _graphicsDevice.SetRenderTarget(ShadowMaps[entityId]);
         _graphicsDevice.Clear(Color.Transparent);
 
         _spriteBatch.Begin(SpriteSortMode.Immediate, effect: _shadowMapEffect);
@@ -111,5 +114,10 @@ public class LightSystem : IRenderSystem, IUpdateSystem
         _spriteBatch.End();
 
         _graphicsDevice.SetRenderTarget(null);
+    }
+
+    private RenderTarget2D CreateShadowMap()
+    {
+        return new RenderTarget2D(_graphicsDevice, 512, 1);
     }
 }

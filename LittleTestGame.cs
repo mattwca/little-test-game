@@ -60,14 +60,23 @@ public class LittleTestGame : Game
             .CreateEntity("light")
             .AddComponent(new PositionComponent(new Vector2(150, 150), 32, 32))
             .AddComponent(new LightComponent(Color.Gold, 100))
-            .AddComponent(new RenderingComponent(Content.Load<Texture2D>("light"), Color.White, castsShadow: false));
+            .AddComponent(new RenderingComponent(Content.Load<Texture2D>("light"), Color.White, castsShadow: false))
+            .AddComponent(new VisibilityComponent());
+
+        // _systemManager.EntityManager
+        //     .CreateEntity("light2")
+        //     .AddComponent(new PositionComponent(new Vector2(200, 200), 32, 32))
+        //     .AddComponent(new LightComponent(Color.Gold, 100))
+        //     .AddComponent(new RenderingComponent(Content.Load<Texture2D>("light"), Color.White, castsShadow: false))
+        //     .AddComponent(new VisibilityComponent());
 
         _systemManager.EntityManager
             .CreateEntity("player")
             .AddComponent(new PositionComponent(new Vector2(150, 50), 32, 32))
             .AddComponent(new RenderingComponent(Content.Load<Texture2D>("player"), Color.White, layer: 2, castsShadow: true))
             .AddComponent(new RenderingComponent(Content.Load<Texture2D>("shadow"), new Color(255, 255, 255, 128), new Vector2(8, 24), layer: 1, 0.5f, castsShadow: false))
-            .AddComponent(new PlayerComponent());
+            .AddComponent(new PlayerComponent())
+            .AddComponent(new VisibilityComponent());
 
         _systemManager.EntityManager
             .CreateEntity("wall")
@@ -75,7 +84,8 @@ public class LittleTestGame : Game
             .AddComponent(new RenderingComponent(Content.Load<Texture2D>("wall"), Color.White, layer: 1))
             .AddComponent(new RenderingComponent(Content.Load<Texture2D>("wall"), Color.White, offset: new Vector2(32, 0)))
             .AddComponent(new RenderingComponent(Content.Load<Texture2D>("wall"), Color.White, offset: new Vector2(0, -32)))
-            .AddComponent(new RenderingComponent(Content.Load<Texture2D>("wall"), Color.White, offset: new Vector2(0, 32)));
+            .AddComponent(new RenderingComponent(Content.Load<Texture2D>("wall"), Color.White, offset: new Vector2(0, 32)))
+            .AddComponent(new VisibilityComponent());
 
         _systemManager.EntityManager
             .CreateEntity("wall2")
@@ -83,7 +93,8 @@ public class LittleTestGame : Game
             .AddComponent(new RenderingComponent(Content.Load<Texture2D>("wall"), Color.White, layer: 1))
             .AddComponent(new RenderingComponent(Content.Load<Texture2D>("wall"), Color.White, offset: new Vector2(32, 0)))
             .AddComponent(new RenderingComponent(Content.Load<Texture2D>("wall"), Color.White, offset: new Vector2(0, -32)))
-            .AddComponent(new RenderingComponent(Content.Load<Texture2D>("wall"), Color.White, offset: new Vector2(0, -64)));
+            .AddComponent(new RenderingComponent(Content.Load<Texture2D>("wall"), Color.White, offset: new Vector2(0, -64)))
+            .AddComponent(new VisibilityComponent());
 
         _systemManager.EntityManager
             .CreateEntity("wall3")
@@ -91,7 +102,8 @@ public class LittleTestGame : Game
             .AddComponent(new RenderingComponent(Content.Load<Texture2D>("wall"), Color.White, layer: 1))
             .AddComponent(new RenderingComponent(Content.Load<Texture2D>("wall"), Color.White, offset: new Vector2(32, 0)))
             .AddComponent(new RenderingComponent(Content.Load<Texture2D>("wall"), Color.White, offset: new Vector2(64, 0)))
-            .AddComponent(new RenderingComponent(Content.Load<Texture2D>("wall"), Color.White, offset: new Vector2(96, 0)));
+            .AddComponent(new RenderingComponent(Content.Load<Texture2D>("wall"), Color.White, offset: new Vector2(96, 0)))
+            .AddComponent(new VisibilityComponent());
 
         _systemManager.EntityManager
             .CreateEntity("wall4")
@@ -99,7 +111,8 @@ public class LittleTestGame : Game
             .AddComponent(new RenderingComponent(Content.Load<Texture2D>("wall"), Color.White, layer: 1))
             .AddComponent(new RenderingComponent(Content.Load<Texture2D>("wall"), Color.White, offset: new Vector2(32, 0)))
             .AddComponent(new RenderingComponent(Content.Load<Texture2D>("wall"), Color.White, offset: new Vector2(64, 0)))
-            .AddComponent(new RenderingComponent(Content.Load<Texture2D>("wall"), Color.White, offset: new Vector2(64, 32)));
+            .AddComponent(new RenderingComponent(Content.Load<Texture2D>("wall"), Color.White, offset: new Vector2(64, 32)))
+            .AddComponent(new VisibilityComponent());
 
         _systemManager.EntityManager
             .CreateEntity("wall5")
@@ -107,13 +120,15 @@ public class LittleTestGame : Game
             .AddComponent(new RenderingComponent(Content.Load<Texture2D>("wall"), Color.White, layer: 1))
             .AddComponent(new RenderingComponent(Content.Load<Texture2D>("wall"), Color.White, offset: new Vector2(0, 32)))
             .AddComponent(new RenderingComponent(Content.Load<Texture2D>("wall"), Color.White, offset: new Vector2(32, 32)))
-            .AddComponent(new RenderingComponent(Content.Load<Texture2D>("wall"), Color.White, offset: new Vector2(64, 32)));
+            .AddComponent(new RenderingComponent(Content.Load<Texture2D>("wall"), Color.White, offset: new Vector2(64, 32)))
+            .AddComponent(new VisibilityComponent());
 
+        _systemManager.AddSystem<VisibilitySystem>();
         _systemManager.AddSystem<PlayerSystem>();
+
         _systemManager.Register(_systemManager.Construct<SpriteRenderer>());
 
-        var lightSystem = _systemManager.AddSystem<LightSystem>();
-        _systemManager.Register(lightSystem);
+        _systemManager.AddSystem<LightSystem>();
 
         _systemManager.Register(_systemManager.Construct<TileRenderer>());
         _systemManager.AddSystem<RenderingSystem>();
