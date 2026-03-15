@@ -15,8 +15,18 @@ public class RenderingComponent : IComponent
     public bool FlipX { get; set; }
     public bool FlipY { get; set; }
     public bool CastsShadow { get; set; }
+    public Rectangle? SourceRectangle { get; set; }
 
-    public RenderingComponent(Texture2D texture, Color colour = default, Vector2 offset = default, int layer = 0, float scale = 1f, bool flipX = false, bool flipY = false, bool castsShadow = true)
+    public RenderingComponent(
+        Texture2D texture,
+        Color colour = default,
+        Vector2 offset = default,
+        int layer = 0,
+        float scale = 1f,
+        bool flipX = false,
+        bool flipY = false,
+        bool castsShadow = true,
+        Rectangle? sourceRectangle = null)
     {
         Texture = texture;
         Colour = colour;
@@ -26,5 +36,6 @@ public class RenderingComponent : IComponent
         FlipX = flipX;
         FlipY = flipY;
         CastsShadow = castsShadow;
+        SourceRectangle = sourceRectangle;
     }
 }

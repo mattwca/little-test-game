@@ -57,7 +57,7 @@ public class LightSystem : IRenderSystem, IUpdateSystem
         return lights.Where((light) => light.GetComponent<VisibilityComponent>().IsVisible).ToArray();
     }
 
-    public void Draw(float deltaTime)
+    public void Draw(GameTime gameTime)
     {
         // Update the light texture render target
         RenderOccluders();
@@ -70,7 +70,7 @@ public class LightSystem : IRenderSystem, IUpdateSystem
         }
     }
 
-    public void Update(float deltaTime)
+    public void Update(GameTime gameTime)
     {
         // var lightEntity = _entityManager.GetEntityWithComponent<LightComponent>()!;
         // var lightComponent = lightEntity.GetComponent<LightComponent>();

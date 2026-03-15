@@ -1,6 +1,8 @@
+using Microsoft.Xna.Framework;
+
 namespace Engine.ECS;
 
 public interface IUpdateSystem
 {
-    void Update(float deltaTime);
+    void Update(GameTime gameTime);
 }

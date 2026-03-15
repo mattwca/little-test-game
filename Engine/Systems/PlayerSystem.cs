@@ -15,10 +15,11 @@ public class PlayerSystem : IUpdateSystem
         _entityManager = entityManager;
     }
 
-    public void Update(float deltaTime)
+    public void Update(GameTime gameTime)
     {
         var playerEntity = _entityManager.GetEntitiesWithComponent<PlayerComponent>().First();
         var positionComponent = playerEntity.GetComponent<PositionComponent>();
+        var animationComponent = playerEntity.GetComponent<AnimationComponent>();
 
         var movementVector = new Vector2();
 
@@ -26,22 +27,23 @@ public class PlayerSystem : IUpdateSystem
         {
             movementVector.Y -= 1;
         }
-
+        
         if (Keyboard.GetState().IsKeyDown(Keys.S))
         {
             movementVector.Y += 1;
         }
-
+        
         if (Keyboard.GetState().IsKeyDown(Keys.A))
         {
             movementVector.X -= 1;
         }
-
+        
         if (Keyboard.GetState().IsKeyDown(Keys.D))
         {
             movementVector.X += 1;
         }
 
-        positionComponent.Position += movementVector * deltaTime * 100;
+        animationComponent.Enabled = movementVector != Vector2.Zero;
+        positionComponent.Position += movementVector * (float)gameTime.ElapsedGameTime.TotalSeconds * 100;
     }
 }

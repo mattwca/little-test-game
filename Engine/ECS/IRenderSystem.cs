@@ -1,6 +1,8 @@
+using Microsoft.Xna.Framework;
+
 namespace Engine.ECS;
 
 public interface IRenderSystem
 {
-    void Draw(float deltaTime);
+    void Draw(GameTime gameTime);
 }

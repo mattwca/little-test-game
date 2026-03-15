@@ -1,5 +1,3 @@
-using System.Linq;
-
 using Engine.Components;
 using Engine.ECS;
 using Engine.Lighting;
@@ -44,7 +42,7 @@ public class RenderingSystem : IRenderSystem
         _renderedFrame = new RenderTarget2D(_graphicsDevice, _graphicsDevice.Viewport.Width, _graphicsDevice.Viewport.Height);
     }
 
-    public void Draw(float deltaTime)
+    public void Draw(GameTime gameTime)
     {
         _graphicsDevice.WithRenderTarget(_renderedFrame, () => {
             _graphicsDevice.Clear(Color.Transparent);
@@ -73,7 +71,7 @@ public class RenderingSystem : IRenderSystem
         _shadowEffect.Parameters["ScreenSize"].SetValue(screenSize);
         _shadowEffect.Parameters["ShadowMap"].SetValue(shadowMap);
 
-        _spriteBatch.Begin(effect: _shadowEffect);
+        _spriteBatch.Begin(effect: _shadowEffect, blendState: BlendState.AlphaBlend);
         _spriteBatch.Draw(_renderedFrame, new Rectangle(0, 0, _graphicsDevice.Viewport.Width, _graphicsDevice.Viewport.Height), Color.White);
         _spriteBatch.End();
     }

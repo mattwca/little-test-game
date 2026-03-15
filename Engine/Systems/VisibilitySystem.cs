@@ -14,7 +14,7 @@ public class VisibilitySystem(EntityManager entityManager, GraphicsDevice graphi
     private readonly EntityManager _entityManager = entityManager;
     private readonly GraphicsDevice _graphicsDevice = graphicsDevice;
 
-    public void Update(float deltaTime)
+    public void Update(GameTime gameTime)
     {
         var cameraEntity = _entityManager.GetEntityWithComponent<CameraComponent>()!;
         var cameraComponent = cameraEntity.GetComponent<CameraComponent>();

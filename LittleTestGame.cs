@@ -1,4 +1,5 @@
-﻿using Engine.Components;
+﻿using Engine.Animation;
+using Engine.Components;
 using Engine.ECS;
 using Engine.Lighting;
 using Engine.Rendering;
@@ -40,10 +41,14 @@ public class LittleTestGame : Game
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
 
+        var animationManager = new AnimationManager();
+        animationManager.AddAnimation(new Animation("playerWalking", 5, 32, 32));
+
         _systemManager
             .Register(_spriteBatch)
             .Register(GraphicsDevice)
-            .Register(Content);
+            .Register(Content)
+            .Register(animationManager);
 
         _systemManager.Register(_systemManager.Construct<Helper>());
 
@@ -76,7 +81,8 @@ public class LittleTestGame : Game
             .AddComponent(new RenderingComponent(Content.Load<Texture2D>("player"), Color.White, layer: 2, castsShadow: true))
             .AddComponent(new RenderingComponent(Content.Load<Texture2D>("shadow"), new Color(255, 255, 255, 128), new Vector2(8, 24), layer: 1, 0.5f, castsShadow: false))
             .AddComponent(new PlayerComponent())
-            .AddComponent(new VisibilityComponent());
+            .AddComponent(new VisibilityComponent())
+            .AddComponent(new AnimationComponent("playerWalking", 30));
 
         _systemManager.EntityManager
             .CreateEntity("wall")
@@ -126,6 +132,8 @@ public class LittleTestGame : Game
         _systemManager.AddSystem<VisibilitySystem>();
         _systemManager.AddSystem<PlayerSystem>();
 
+        _systemManager.AddSystem<AnimationSystem>();
+
         _systemManager.Register(_systemManager.Construct<SpriteRenderer>());
 
         _systemManager.AddSystem<LightSystem>();
@@ -139,7 +147,7 @@ public class LittleTestGame : Game
         if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
 
-        _systemManager.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
+        _systemManager.Update(gameTime);
 
         base.Update(gameTime);
     }
@@ -148,7 +156,7 @@ public class LittleTestGame : Game
     {
         GraphicsDevice.Clear(Color.CornflowerBlue);
 
-        _systemManager.Render((float)gameTime.ElapsedGameTime.TotalSeconds);
+        _systemManager.Render(gameTime);
 
         base.Draw(gameTime);
     }

@@ -64,7 +64,7 @@ public class SpriteRenderer
             _spriteBatch.Draw(
                 renderingComponent.Texture,
                 worldPosition,
-                null,
+                renderingComponent.SourceRectangle,
                 renderingComponent.Colour,
                 positionComponent.Rotation,
                 Vector2.Zero,

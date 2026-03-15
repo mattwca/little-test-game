@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace Engine.ECS;
@@ -63,14 +64,14 @@ public class SystemManager
         return system;
     }
 
-    public void Update(float deltaTime)
+    public void Update(GameTime gameTime)
     {
-        _updateSystems.ForEach(system => system.Update(deltaTime));
+        _updateSystems.ForEach(system => system.Update(gameTime));
     }
 
-    public void Render(float deltaTime)
+    public void Render(GameTime gameTime)
     {
-        _renderSystems.ForEach(system => system.Draw(deltaTime));
+        _renderSystems.ForEach(system => system.Draw(gameTime));
     }
 
     private object Resolve(Type type)
