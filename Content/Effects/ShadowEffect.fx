@@ -32,14 +32,14 @@ float4 ShadowPixelShader(float4 color : COLOR0, float2 texCoord : TEXCOORD0) : C
     float shadowMapValue = tex2D(ShadowMap, float2(uv, 0)).r;
 
     // Get the colour from the rendered frame.
-    float4 colour = tex2D(Texture, texCoord) * color;
+    float4 colour = lerp(tex2D(Texture, texCoord) * color, LightColour, 0.05);
     
     float bias = 0.031;
 
     // If the rendered frame contains a transparent pixel at this position, and we're further away than the encoded
     // distance, we render a shadow.
     if (distanceToLight > shadowMapValue + bias) {
-        return lerp(colour, float4(0.25, 0.25, 0.25, 1), clamp(pow(distanceToLight, 2), 0, 1)) * LightColour;
+        return lerp(colour, float4(0.25, 0.25, 0.25, 1), clamp(pow(distanceToLight, 2.0), 0.0, 1.0)) * LightColour;
     }
 
     return colour;
