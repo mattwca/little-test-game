@@ -8,6 +8,7 @@ public class LightComponent : IComponent
 {
     public Color Colour { get; set; }
     public float Intensity { get; set; }
+    public Entity Parent { get; set; }
 
     public LightComponent(Color? colour = null, float intensity = 1f)
     {

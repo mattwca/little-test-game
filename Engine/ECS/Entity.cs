@@ -61,6 +61,16 @@ public class Entity
         throw new Exception($"Entity {Id} does not have component of type {typeof(T)}");
     }
 
+    public T[] GetComponentsWith<T>(Func<T, bool> predicate) where T : IComponent
+    {
+        if (_components.ContainsKey(typeof(T)))
+        {
+            return [.. _components[typeof(T)].Cast<T>().Where(predicate)];
+        }
+
+        throw new Exception($"Entity {Id} does not have component of type {typeof(T)}");
+    }
+
     public T[] GetComponents<T>() where T : IComponent
     {
         if (_components.ContainsKey(typeof(T)))

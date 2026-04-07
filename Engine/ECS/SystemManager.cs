@@ -14,6 +14,7 @@ public class SystemManager
     private readonly Dictionary<Type, object> _serviceCollection = new();
     private readonly List<IUpdateSystem> _updateSystems;
     private readonly List<IRenderSystem> _renderSystems;
+    private readonly StateManager _stateManager;
 
     public SystemManager()
     {
@@ -21,6 +22,9 @@ public class SystemManager
 
         EntityManager = new EntityManager();
         Register(EntityManager);
+
+        _stateManager = new StateManager();
+        Register(_stateManager);
 
         _updateSystems = [];
         _renderSystems = [];

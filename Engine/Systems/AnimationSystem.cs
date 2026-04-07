@@ -29,7 +29,7 @@ public class AnimationSystem : IUpdateSystem
             var renderingComponent = entity.GetComponent<RenderingComponent>();
             var animation = _animationManager.GetAnimation(animationComponent.AnimationKey)!;
 
-            var increment = 10 * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            var increment = 15 * (float)gameTime.ElapsedGameTime.TotalSeconds;
             animationComponent.FrameTime += increment;
 
             var currentFrameIndex = animationComponent.Enabled
