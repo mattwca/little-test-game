@@ -66,7 +66,9 @@ public class LightSystem : IRenderSystem, IUpdateSystem
         foreach (var light in visibleLights)
         {
             var positionComponent = light.GetComponent<PositionComponent>();
-            RenderShadowMap(light.Id, positionComponent);
+            var lightComponent = light.GetComponent<LightComponent>();
+
+            RenderShadowMap(light.Id, positionComponent, lightComponent);
         }
     }
 
@@ -93,13 +95,14 @@ public class LightSystem : IRenderSystem, IUpdateSystem
         });
     }
 
-    private void RenderShadowMap(string entityId, PositionComponent lightPosition)
+    private void RenderShadowMap(string entityId, PositionComponent lightPosition, LightComponent lightComponent)
     {
         var cameraEntity = _entityManager.GetEntitiesWithComponent<CameraComponent>().FirstOrDefault();
         var cameraComponent = cameraEntity?.GetComponent<CameraComponent>();
 
         _shadowMapEffect.Parameters["LightPosition"].SetValue(Vector2.Transform(lightPosition.Centre, cameraComponent!.Transform));
         _shadowMapEffect.Parameters["Resolution"].SetValue(new Vector2(_graphicsDevice.Viewport.Width, _graphicsDevice.Viewport.Height));
+        _shadowMapEffect.Parameters["LightRadius"].SetValue(lightComponent.Radius / _graphicsDevice.Viewport.Height);
 
         if (!ShadowMaps.ContainsKey(entityId))
         {

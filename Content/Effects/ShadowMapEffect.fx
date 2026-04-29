@@ -2,6 +2,7 @@
 
     float2 LightPosition : register(c0);
     float2 Resolution : register(c1);
+    float LightRadius : register(c2);
 
     #define STEPS 400
 
@@ -23,21 +24,22 @@
         float2 position = LightPosition / Resolution;
         float2 positionCorrected = float2(position.x * aspectRatio, position.y);
 
+        float stepSize = LightRadius / STEPS;
+
         for (int i = 0; i < STEPS; i++) {
-            // Calculate the distance from the centre of the circle for this iteration.
-            // Increasing the steps const will increase the number of samples.
-            float stepDistance = (float)i / STEPS;
+            float stepDistance = (float)i * stepSize;
 
             // March in corrected UV space, then convert back to regular UV for texture sampling.
             float2 sampleCorrected = positionCorrected + direction * stepDistance;
             float2 sampleCoord = float2(sampleCorrected.x / aspectRatio, sampleCorrected.y);
 
             if (sampleCoord.x > 1 || sampleCoord.x < 0 || sampleCoord.y > 1 || sampleCoord.y < 0) {
-                return float4(1, 1, 1, 1);
+                continue;
+                //return float4(LightRadius, LightRadius, LightRadius, 1.0);
             }
 
             // Get the colour in the occluder texture.
-            float4 colourAtCoord = tex2D(OccluderTexture, sampleCoord);
+            float4 colourAtCoord = tex2Dlod(OccluderTexture, float4(sampleCoord, 0, 0));
             float alpha = colourAtCoord.a;
 
             // Check if we've hit an occluding pixel.
@@ -46,7 +48,7 @@
             }
         }
 
-        return float4(1, 1, 1, 1);
+        return float4(LightRadius, LightRadius, LightRadius, 1.0);
     }
 
     technique ShadowMap

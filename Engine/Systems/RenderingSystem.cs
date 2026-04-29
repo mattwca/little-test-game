@@ -68,6 +68,7 @@ public class RenderingSystem : IRenderSystem
 
         _shadowEffect.Parameters["LightPosition"].SetValue(Vector2.Transform(lightPositionComponent.Centre, cameraTransform));
         _shadowEffect.Parameters["LightColour"].SetValue(lightComponent.Colour.ToVector4());
+        _shadowEffect.Parameters["LightRadius"].SetValue(lightComponent.Radius / _graphicsDevice.Viewport.Height);
         _shadowEffect.Parameters["ScreenSize"].SetValue(screenSize);
         _shadowEffect.Parameters["ShadowMap"].SetValue(shadowMap);
 

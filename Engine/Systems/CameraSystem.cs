@@ -8,13 +8,13 @@ namespace Engine.Systems;
 
 public class CameraSystem : IUpdateSystem
 {
-    private EntityManager _entityManager;
-    private GraphicsDevice _graphicsDevice;
+    private readonly EntityManager _entityManager;
+    private readonly GraphicsDevice _graphicsDevice;
 
     public CameraSystem(EntityManager entityManager, GraphicsDevice graphicsDevice)
     {
-        this._entityManager = entityManager;
-        this._graphicsDevice = graphicsDevice;
+        _entityManager = entityManager;
+        _graphicsDevice = graphicsDevice;
     }
 
     public void Update(GameTime gameTime)
@@ -33,9 +33,12 @@ public class CameraSystem : IUpdateSystem
         }
 
         var entityPosition = followingEntity.GetComponent<PositionComponent>();
-        var screenWidth = this._graphicsDevice.Viewport.Width;
-        var screenHeight = this._graphicsDevice.Viewport.Height;
+        var screenWidth = _graphicsDevice.Viewport.Width / 2f;
+        var screenHeight = _graphicsDevice.Viewport.Height / 2f;
+
+        var newPosition = entityPosition.Position - new Vector2(screenWidth / 2, screenHeight / 2);
+        newPosition.Round();
         
-        cameraComponent.Position = entityPosition.Position - new Vector2(200, 150); // - new Vector2(screenWidth / 2f, screenHeight / 2f);
+        cameraComponent.Position = newPosition;
     }
 }
