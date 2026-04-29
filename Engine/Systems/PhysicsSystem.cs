@@ -96,43 +96,43 @@ public class PhysicsSystem : IUpdateSystem, IRenderSystem
 
         _intersectResults.Clear();
 
-        // foreach (var entity in dynamicBoundingEntities)
-        // {
-        //     var positionComponent = entity.GetComponent<PositionComponent>()!;
-        //     var boundingBoxComponent = entity.GetComponent<BoundingBoxComponent>()!;
+        foreach (var entity in dynamicBoundingEntities)
+        {
+            var positionComponent = entity.GetComponent<PositionComponent>()!;
+            var boundingBoxComponent = entity.GetComponent<BoundingBoxComponent>()!;
 
-        //     var boundingRect = GetBoundingRectangleForComponents(positionComponent, boundingBoxComponent);
-        //     var intersectors = _quadTree.GetIntersectors(boundingRect);
+            var boundingRect = GetBoundingRectangleForComponents(positionComponent, boundingBoxComponent);
+            var intersectors = _quadTree.GetIntersectors(boundingRect);
 
-        //     foreach (var intersector in intersectors)
-        //     {
-        //         var intersectionResult = Rectangle.Intersect(boundingRect, intersector);
-        //         _intersectResults.Add(intersectionResult);
+            foreach (var intersector in intersectors)
+            {
+                var intersectionResult = Rectangle.Intersect(boundingRect, intersector);
+                _intersectResults.Add(intersectionResult);
 
-        //         if (intersectionResult.Width < intersectionResult.Height)
-        //         {
-        //             if (intersectionResult.X < positionComponent.Position.X)
-        //             {
-        //                 positionComponent.Position += new Vector2(intersectionResult.Width, 0);
-        //             }
-        //             else
-        //             {
-        //                 positionComponent.Position -= new Vector2(intersectionResult.Width, 0);
-        //             }
-        //         }
-        //         else
-        //         {
-        //             if (intersectionResult.Y > boundingRect.Y)
-        //             {
-        //                 positionComponent.Position -= new Vector2(0, intersectionResult.Height);
-        //             }
-        //             else
-        //             {
-        //                 positionComponent.Position += new Vector2(0, intersectionResult.Height);
-        //             }
-        //         }
-        //     }
-        // }
+                if (intersectionResult.Width < intersectionResult.Height)
+                {
+                    if (intersectionResult.X < positionComponent.Position.X)
+                    {
+                        positionComponent.Position += new Vector2(intersectionResult.Width, 0);
+                    }
+                    else
+                    {
+                        positionComponent.Position -= new Vector2(intersectionResult.Width, 0);
+                    }
+                }
+                else
+                {
+                    if (intersectionResult.Y > boundingRect.Y)
+                    {
+                        positionComponent.Position -= new Vector2(0, intersectionResult.Height);
+                    }
+                    else
+                    {
+                        positionComponent.Position += new Vector2(0, intersectionResult.Height);
+                    }
+                }
+            }
+        }
     }
 
     private Rectangle GetBoundingRectangleForComponents(PositionComponent positionComponent, BoundingBoxComponent boundingBoxComponent)
