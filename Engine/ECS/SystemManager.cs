@@ -3,10 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
 namespace Engine.ECS;
 
+/// <summary>
+/// The System Manager, acts as a DI container for update and render systems.
+/// 
+/// Exposes `update` and `render` methods which should be called as part of the game loop,
+/// and will invoke each registered system. Systems are invoked in the order that they are
+/// registered.
+/// 
+/// Note that dependencies are constructed as and when they are registered - they are not
+/// invoked lazily.
+/// </summary>
 public class SystemManager
 {
     public EntityManager EntityManager { get; }

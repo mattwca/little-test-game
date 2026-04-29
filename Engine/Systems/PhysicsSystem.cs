@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using Engine.Components;
@@ -19,41 +20,45 @@ public class PhysicsSystem : IUpdateSystem, IRenderSystem
     private readonly ShapeRenderer _shapeRenderer;
     private readonly QuadTree _quadTree;
 
+    private readonly List<Rectangle> _intersectResults;
+
     public PhysicsSystem(SpriteBatch spriteBatch, StateManager stateManager, EntityManager entityManager, ShapeRenderer shapeRenderer)
     {
-        this._spriteBatch = spriteBatch;
-        this._stateManager = stateManager;
-        this._entityManager = entityManager;
-        this._shapeRenderer = shapeRenderer;
-        this._quadTree = new QuadTree(800, 600);
+        _spriteBatch = spriteBatch;
+        _stateManager = stateManager;
+        _entityManager = entityManager;
+        _shapeRenderer = shapeRenderer;
+        _quadTree = new QuadTree(800, 600);
 
-        this.BuildQuadTree();
+        _intersectResults = new List<Rectangle>();
+
+        BuildQuadTree();
     }
 
     public void Draw(GameTime gameTime)
     {
-        if (!this._stateManager.GetBool("debugMode"))
+        if (!_stateManager.GetBool("debugMode"))
         {
             return;
         }
 
-        var cameraEntity = this._entityManager.GetEntityWithComponent<CameraComponent>()!;
+        var cameraEntity = _entityManager.GetEntityWithComponent<CameraComponent>()!;
         var cameraComponent = cameraEntity.GetComponent<CameraComponent>();
 
-        this._spriteBatch.Begin(transformMatrix: cameraComponent.Transform, blendState: BlendState.AlphaBlend);
+        _spriteBatch.Begin(transformMatrix: cameraComponent.Transform, blendState: BlendState.AlphaBlend);
 
         // Render all static bounding boxes in the quad tree
-        this._quadTree.WalkTree((leaf) =>
+        _quadTree.WalkTree((leaf) =>
         {
-            this._shapeRenderer.RenderSquare(leaf.NodeBox, Color.Red);
+            _shapeRenderer.RenderSquare(leaf.NodeBox, Color.Red);
 
             foreach (var bb in leaf.BoundingBoxes)
             {
-                this._shapeRenderer.RenderSquare(bb, Color.Red);
+                _shapeRenderer.RenderSquare(bb, Color.Red);
             }
         }, (branch) =>
         {
-            this._shapeRenderer.RenderSquare(branch.NodeBox, Color.Red);
+            _shapeRenderer.RenderSquare(branch.NodeBox, Color.Red);
         });
 
         var entities = _entityManager
@@ -73,20 +78,61 @@ public class PhysicsSystem : IUpdateSystem, IRenderSystem
             }
         }
 
-        this._spriteBatch.End();
+        foreach (var intersectResult in _intersectResults)
+        {
+            _shapeRenderer.RenderSquare(intersectResult, Color.Green);
+        }
+
+        _spriteBatch.End();
     }
 
     public void Update(GameTime gameTime)
     {
-        var playerEntity = _entityManager.GetEntity("player");
-        var playerPosition = playerEntity.GetComponent<PositionComponent>();
-        var boundingBox = playerEntity.GetComponent<BoundingBoxComponent>();
+        var dynamicBoundingEntities = _entityManager.Entities.Where(entity =>
+            entity.HasComponent<PositionComponent>() &&
+            entity.HasComponent<BoundingBoxComponent>() &&
+            !entity.GetComponent<BoundingBoxComponent>().IsStatic
+        );
 
-        var intersectors = _quadTree.GetIntersectors(GetBoundingRectangleForComponents(playerPosition, boundingBox));
-        foreach (var intersector in intersectors)
-        {
-            Console.WriteLine("Intersector: {0}, {1}", intersector.X, intersector.Y);
-        }
+        _intersectResults.Clear();
+
+        // foreach (var entity in dynamicBoundingEntities)
+        // {
+        //     var positionComponent = entity.GetComponent<PositionComponent>()!;
+        //     var boundingBoxComponent = entity.GetComponent<BoundingBoxComponent>()!;
+
+        //     var boundingRect = GetBoundingRectangleForComponents(positionComponent, boundingBoxComponent);
+        //     var intersectors = _quadTree.GetIntersectors(boundingRect);
+
+        //     foreach (var intersector in intersectors)
+        //     {
+        //         var intersectionResult = Rectangle.Intersect(boundingRect, intersector);
+        //         _intersectResults.Add(intersectionResult);
+
+        //         if (intersectionResult.Width < intersectionResult.Height)
+        //         {
+        //             if (intersectionResult.X < positionComponent.Position.X)
+        //             {
+        //                 positionComponent.Position += new Vector2(intersectionResult.Width, 0);
+        //             }
+        //             else
+        //             {
+        //                 positionComponent.Position -= new Vector2(intersectionResult.Width, 0);
+        //             }
+        //         }
+        //         else
+        //         {
+        //             if (intersectionResult.Y > boundingRect.Y)
+        //             {
+        //                 positionComponent.Position -= new Vector2(0, intersectionResult.Height);
+        //             }
+        //             else
+        //             {
+        //                 positionComponent.Position += new Vector2(0, intersectionResult.Height);
+        //             }
+        //         }
+        //     }
+        // }
     }
 
     private Rectangle GetBoundingRectangleForComponents(PositionComponent positionComponent, BoundingBoxComponent boundingBoxComponent)

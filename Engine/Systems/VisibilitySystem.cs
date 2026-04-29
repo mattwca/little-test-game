@@ -11,6 +11,8 @@ namespace Engine.Systems;
 
 public class VisibilitySystem(EntityManager entityManager, GraphicsDevice graphicsDevice) : IUpdateSystem
 {
+    private readonly Vector2 _visibilityBoundaryOffset = new Vector2(400, 400);
+
     private readonly EntityManager _entityManager = entityManager;
     private readonly GraphicsDevice _graphicsDevice = graphicsDevice;
 
@@ -26,9 +28,8 @@ public class VisibilitySystem(EntityManager entityManager, GraphicsDevice graphi
 
         var inverseCameraTransform = Matrix.Invert(cameraComponent.Transform);
 
-        var transformedTopLeft = Vector2.Transform(topLeft, inverseCameraTransform);
-        var transformedBottomRight = Vector2.Transform(bottomRight, inverseCameraTransform);
-
+        var transformedTopLeft = Vector2.Transform(topLeft, inverseCameraTransform) - _visibilityBoundaryOffset;
+        var transformedBottomRight = Vector2.Transform(bottomRight, inverseCameraTransform) + _visibilityBoundaryOffset;
         var cameraWorldBoundingBox = new Rectangle(
             (int)transformedTopLeft.X,
             (int)transformedTopLeft.Y,
@@ -36,12 +37,33 @@ public class VisibilitySystem(EntityManager entityManager, GraphicsDevice graphi
             (int)transformedBottomRight.Y - (int)transformedTopLeft.Y
         );
 
-        foreach (var entity in entitiesToCheck)
+    foreach (var entity in entitiesToCheck)
         {
             var entityPosition = entity.GetComponent<PositionComponent>();
             var entityVisibility = entity.GetComponent<VisibilityComponent>();
+
+            var entityOffsetVector = new Vector2(entityVisibility.Offset, entityVisibility.Offset);
+            var entityBoundingTopLeft = entityPosition.Position - entityOffsetVector;
+            var entityBoundingDimensions = entityOffsetVector * 2;
+
+            var entityBoundingBox = new Rectangle(entityBoundingTopLeft.ToPoint(), entityBoundingDimensions.ToPoint());
             
-            entityVisibility.IsVisible = cameraWorldBoundingBox.Contains(entityPosition.Position);
+            entityVisibility.IsVisible = cameraWorldBoundingBox.Intersects(entityBoundingBox);
+            if (entityVisibility.IsVisible || entityVisibility.Offset == 0f)
+            {
+                continue;
+            }
+
+            var offset = entityVisibility.Offset;
+            var entityOffsetBoundingBox = new Rectangle(
+                new Point(
+                    (int)entityPosition.Position.X,
+                    (int)entityPosition.Position.Y),
+                    new Point((int)offset, (int)offset
+                )
+            );
+
+            entityVisibility.IsVisible = cameraWorldBoundingBox.Intersects(entityOffsetBoundingBox);
         }
     }
 }

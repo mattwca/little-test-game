@@ -8,11 +8,13 @@ public class CameraComponent : IComponent
 {
     public Vector2 Position { get; set; }
     public float Zoom { get; set; }
+    public string? Following { get; set; }
     public Matrix Transform => Matrix.CreateTranslation(new Vector3(-Position, 0)) * Matrix.CreateScale(Zoom);
 
-    public CameraComponent(Vector2 position, float zoom)
+    public CameraComponent(Vector2 position, float zoom, string? following = null)
     {
         Position = position;
         Zoom = zoom;
+        Following = following;
     }
 }
