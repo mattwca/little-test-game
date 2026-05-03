@@ -47,7 +47,7 @@ public class VisibilitySystem(EntityManager entityManager, GraphicsDevice graphi
             var entityBoundingDimensions = entityOffsetVector * 2;
 
             var entityBoundingBox = new Rectangle(entityBoundingTopLeft.ToPoint(), entityBoundingDimensions.ToPoint());
-            
+
             entityVisibility.IsVisible = cameraWorldBoundingBox.Intersects(entityBoundingBox);
             if (entityVisibility.IsVisible || entityVisibility.Offset == 0f)
             {

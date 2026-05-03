@@ -69,7 +69,14 @@ public class LittleTestGame : Game
 
         _systemManager.EntityManager
             .CreateEntity("light2")
-            .AddComponent(new PositionComponent(new Vector2(200, 200), 32, 32))
+            .AddComponent(new PositionComponent(new Vector2(400, 250), 32, 32))
+            .AddComponent(new LightComponent(Color.Gold, 100))
+            .AddComponent(new RenderingComponent(Content.Load<Texture2D>("light"), Color.White, castsShadow: false))
+            .AddComponent(new VisibilityComponent(offset: 50));
+
+        _systemManager.EntityManager
+            .CreateEntity("light3")
+            .AddComponent(new PositionComponent(new Vector2(350, 50), 32, 32))
             .AddComponent(new LightComponent(Color.Gold, 100))
             .AddComponent(new RenderingComponent(Content.Load<Texture2D>("light"), Color.White, castsShadow: false))
             .AddComponent(new VisibilityComponent(offset: 50));

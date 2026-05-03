@@ -13,11 +13,11 @@
 
 #---------------------------------- Content ---------------------------------#
 
-#begin Effects/ShadowEffect.fx
+#begin Effects/LightingEffect.fx
 /importer:EffectImporter
 /processor:EffectProcessor
 /processorParam:DebugMode=Auto
-/build:Effects/ShadowEffect.fx
+/build:Effects/LightingEffect.fx
 
 #begin Effects/ShadowMapEffect.fx
 /importer:EffectImporter
