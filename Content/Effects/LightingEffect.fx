@@ -8,10 +8,60 @@ float2 ScreenSize : register(c3);
 
 static const float4 UNLIT_PIXEL = float4(0, 0, 0, 0);
 
-static const int SAMPLES = 5;
+/**
+ * The spread (distance between samples) to use when sampling nearby pixels for soft
+ * shadowing.
+ *
+ * Since this controls how "far away" we look in the map, a lower value should produce
+ * sharper shadows, and a higher value should produce softer.
+ */
 static const float SAMPLE_SPREAD = 0.008;
+static const int SAMPLES = 5;
 
 static const float SHADOW_BIAS = 0.025;
+
+/**
+ * Implements PCF (Percentage-Closer Filtering) to render softened shadows.
+ *
+ * We take multiple samples from the shadow map for pixels around the current position,
+ * and use them to increase/decrease the darkness of the shadow (adds a soft edge).
+ */
+float CalculateNearbyVisibilityWeight(float uv, float distanceToLight)
+{
+    int visibleCount = 0;
+
+    for (int i = 0; i < SAMPLES; i++) {
+        // Calculate an offset from the current position in the shadow map.
+        float offset = (i / float(SAMPLES - 1) - 0.5) * SAMPLE_SPREAD;
+        float sampleUv = frac(uv + offset);
+
+        // Get the corresponding distance value.
+        float sampleShadow = tex2D(ShadowMap, float2(sampleUv, 0)).r;
+
+        // If the pixel is in shadow, add 1 to the count.
+        bool inShadow = distanceToLight > sampleShadow + SHADOW_BIAS;
+        visibilityCount += inShadow ? 0 : 1;
+    }
+
+    // Return the percentage of nearby samples that are visible.
+    float percentageVisible = visibilityCount /= SAMPLES;
+    return percentageVisible;
+}
+
+float CalculateFalloff(float distanceToLight)
+{
+    // This pixel is lit, so we render the light colour scaled by the falloff curve. The falloff is calculated
+    // using the inverse-square law. The closer a pixel is to the light source, the brighter.
+    // Each lighting layer is summed with the last, so the brightness of a given pixel is the accumulation of each
+    // light source's contribution.
+    float normalisedDistance = distanceToLight / LightRadius;
+    float attenuation = 1.0 / (1.0 + 25.0 * normalisedDistance * normalisedDistance);
+
+    float window = saturate(1.0 - normalisedDistance * normalisedDistance * normalisedDistance * normalisedDistance);
+    window = window * window;
+
+    return attenuation * window;
+}
 
 /**
  * A shader which additively renders shadows for a given light source, using a 1D shadow map,
@@ -23,7 +73,7 @@ static const float SHADOW_BIAS = 0.025;
  *
  * Uses inverse-square falloff to dictate the amount of shadow.
  */
-float4 ShadowPixelShader(float2 texCoord : TEXCOORD0) : COLOR0
+float4 LightingPixelShader(float2 texCoord : TEXCOORD0) : COLOR0
 {
     // Convert the light position from pixel space to uv space (0-1).
     float2 lightPositionUV = LightPosition / ScreenSize;
@@ -61,31 +111,14 @@ float4 ShadowPixelShader(float2 texCoord : TEXCOORD0) : COLOR0
         return UNLIT_PIXEL;
     }
 
-    float visibility = 0.0;
-    for (int i = 0; i < SAMPLES; i++) {
-        float offset = (i / float(SAMPLES - 1) - 0.5) * SAMPLE_SPREAD;
-        float sampleUv = frac(uv + offset);
-        float sampleShadow = tex2D(ShadowMap, float2(sampleUv, 0)).r;
-        visibility += distanceToLight > sampleShadow + bias ? 0.0 : 1.0;
-    }
-    visibility /= SAMPLES;
+    float visibility = CalculateNearbyVisibilityWeight(uv, distanceToLight);
+    float falloff = CalculateFalloff(distanceToLight);
 
-    // This pixel is lit, so we render the light colour scaled by the falloff curve. The falloff is calculated
-    // using the inverse-square law. The closer a pixel is to the light source, the brighter.
-    // Each lighting layer is summed with the last, so the brightness of a given pixel is the accumulation of each
-    // light source's contribution.
-    float normalisedDistance = distanceToLight / LightRadius;
-    float attenuation = 1.0 / (1.0 + 25.0 * normalisedDistance * normalisedDistance);
-
-    float window = saturate(1.0 - normalisedDistance * normalisedDistance * normalisedDistance * normalisedDistance);
-    window = window * window;
-
-    float falloff = attenuation * window;
     return LightColour * falloff * visibility;
 }
 
 technique SpriteBatch { 
     pass { 
-        PixelShader = compile ps_3_0 ShadowPixelShader();
+        PixelShader = compile ps_3_0 LightingPixelShader();
     }
 }
