@@ -14,6 +14,8 @@ public class RenderingSystem : IRenderSystem
 {
     private readonly GraphicsDevice _graphicsDevice;
     private readonly ContentManager _contentManager;
+    private readonly StateManager _stateManager;
+
     private readonly LightSystem _lightSystem;
     private readonly SpriteBatch _spriteBatch;
     private readonly Helper _helper;
@@ -32,10 +34,12 @@ public class RenderingSystem : IRenderSystem
         ColorDestinationBlend = Blend.Zero,
     };
 
-    public RenderingSystem(GraphicsDevice graphicsDevice, ContentManager contentManager, LightSystem lightSystem, SpriteBatch spriteBatch, Helper helper, SpriteRenderer spriteRenderer, TileRenderer tileRenderer)
+    public RenderingSystem(GraphicsDevice graphicsDevice, ContentManager contentManager, StateManager stateManager, LightSystem lightSystem, SpriteBatch spriteBatch, Helper helper, SpriteRenderer spriteRenderer, TileRenderer tileRenderer)
     {
         _graphicsDevice = graphicsDevice;
         _contentManager = contentManager;
+        _stateManager = stateManager;
+
         _lightSystem = lightSystem;
         _spriteBatch = spriteBatch;
         _helper = helper;
@@ -51,7 +55,25 @@ public class RenderingSystem : IRenderSystem
 
     public void Draw(GameTime gameTime)
     {
+        if (_stateManager.GetBool("renderLightingMap"))
+        {
+            DrawDebugMode();
+            return;
+        }
+
         DrawWithLighting();
+    }
+
+    private void DrawDebugMode()
+    {
+        RenderSceneBuffer();
+        RenderLightingBuffer();
+
+        _graphicsDevice.Clear(Color.White);
+
+        _spriteBatch.Begin();
+        _spriteBatch.Draw(_lightingBuffer, ViewportRectangle, Color.White);
+        _spriteBatch.End();
     }
 
     /// <summary>
@@ -63,11 +85,11 @@ public class RenderingSystem : IRenderSystem
         RenderLightingBuffer();
 
         _spriteBatch.Begin(blendState: BlendState.Opaque);
-        _spriteBatch.Draw(_sceneBuffer, new Rectangle(0, 0, _graphicsDevice.Viewport.Width, _graphicsDevice.Viewport.Height), Color.White);
+        _spriteBatch.Draw(_sceneBuffer, ViewportRectangle, Color.White);
         _spriteBatch.End();
 
         _spriteBatch.Begin(blendState: MultiplyBlend);
-        _spriteBatch.Draw(_lightingBuffer, new Rectangle(0, 0, _graphicsDevice.Viewport.Width, _graphicsDevice.Viewport.Height), Color.White);
+        _spriteBatch.Draw(_lightingBuffer, ViewportRectangle, Color.White);
         _spriteBatch.End();
     }
 
@@ -126,7 +148,9 @@ public class RenderingSystem : IRenderSystem
         _lightingEffect.Parameters["ShadowMap"].SetValue(shadowMap);
 
         _spriteBatch.Begin(effect: _lightingEffect, blendState: BlendState.Additive);
-        _spriteBatch.Draw(_sceneBuffer, new Rectangle(0, 0, _graphicsDevice.Viewport.Width, _graphicsDevice.Viewport.Height), Color.White);
+        _spriteBatch.Draw(_sceneBuffer, ViewportRectangle, Color.White);
         _spriteBatch.End();
     }
+
+    private Rectangle ViewportRectangle => new(0, 0, _graphicsDevice.Viewport.Width, _graphicsDevice.Viewport.Height);
 }

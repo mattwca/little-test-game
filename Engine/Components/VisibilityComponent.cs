@@ -2,7 +2,7 @@ using Engine.ECS;
 
 namespace Engine.Components;
 
-public class VisibilityComponent(bool isVisible = false, float offset = 0f) : IComponent
+public class VisibilityComponent(bool isVisible = false, float offset = 50f) : IComponent
 {
     /// <summary>
     /// Indicates whether the entity this component is attached to is visible or not.

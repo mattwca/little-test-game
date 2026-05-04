@@ -3,6 +3,7 @@ using System.Linq;
 
 using Engine.Components;
 using Engine.ECS;
+using Engine.Utils;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
@@ -12,23 +13,34 @@ public class PlayerSystem : IUpdateSystem
     private readonly StateManager _stateManager;
     private readonly EntityManager _entityManager;
 
+    private readonly KeyboardHandler _keyboardHandler;
+
     public PlayerSystem(StateManager stateManager, EntityManager entityManager)
     {
         _stateManager = stateManager;
         _entityManager = entityManager;
+
+        _keyboardHandler = new KeyboardHandler();
     }
 
     public void Update(GameTime gameTime)
     {
-        this.HandlePlayerMovement(gameTime);
-        this.HandleOtherInput();
+        _keyboardHandler.OnUpdate();
+
+        HandlePlayerMovement(gameTime);
+        HandleOtherInput();
     }
 
     private void HandleOtherInput()
     {
-        if (Keyboard.GetState().IsKeyDown(Keys.OemTilde))
+        if (_keyboardHandler.WasKeyPressed(Keys.OemTilde))
         {
-            _stateManager.SetBool("debugMode", true);
+            _stateManager.ToggleBool("renderBoundingBoxes");
+        }
+
+        if (_keyboardHandler.WasKeyPressed(Keys.P))
+        {
+            _stateManager.ToggleBool("renderLightingMap");
         }
     }
 

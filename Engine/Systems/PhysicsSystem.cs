@@ -37,7 +37,7 @@ public class PhysicsSystem : IUpdateSystem, IRenderSystem
 
     public void Draw(GameTime gameTime)
     {
-        if (!_stateManager.GetBool("debugMode"))
+        if (!_stateManager.GetBool("renderBoundingBoxes"))
         {
             return;
         }

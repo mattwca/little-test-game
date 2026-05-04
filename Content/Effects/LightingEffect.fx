@@ -18,6 +18,9 @@ static const float4 UNLIT_PIXEL = float4(0, 0, 0, 0);
 static const float SAMPLE_SPREAD = 0.008;
 static const int SAMPLES = 5;
 
+/**
+ * The shadow bias - controls how far from the occluder we start rendering the shadow.
+ */
 static const float SHADOW_BIAS = 0.025;
 
 /**
@@ -28,7 +31,7 @@ static const float SHADOW_BIAS = 0.025;
  */
 float CalculateNearbyVisibilityWeight(float uv, float distanceToLight)
 {
-    int visibleCount = 0;
+    int visibilityCount = 0;
 
     for (int i = 0; i < SAMPLES; i++) {
         // Calculate an offset from the current position in the shadow map.
@@ -44,7 +47,7 @@ float CalculateNearbyVisibilityWeight(float uv, float distanceToLight)
     }
 
     // Return the percentage of nearby samples that are visible.
-    float percentageVisible = visibilityCount /= SAMPLES;
+    float percentageVisible = float(visibilityCount) /= SAMPLES;
     return percentageVisible;
 }
 

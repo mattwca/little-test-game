@@ -26,4 +26,10 @@ public class StateManager
 
         return defaultVal;
     }
+
+    public void ToggleBool(string name)
+    {
+        var currentValue = GetBool(name);
+        SetBool(name, !currentValue);
+    }
 }
