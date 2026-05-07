@@ -61,7 +61,7 @@ public class LightSystem : IRenderSystem, IUpdateSystem
     {
         // Update the light texture render target
         RenderOccluders();
-        
+
         var visibleLights = GetVisibleLights();
         foreach (var light in visibleLights)
         {

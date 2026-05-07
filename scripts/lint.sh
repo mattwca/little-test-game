@@ -1,0 +1,1 @@
+dotnet format ../little-test-game.sln

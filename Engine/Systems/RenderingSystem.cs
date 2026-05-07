@@ -24,7 +24,7 @@ public class RenderingSystem : IRenderSystem
 
     private readonly SpriteRenderer _spriteRenderer;
     private readonly TileRenderer _tileRenderer;
-    
+
     private readonly RenderTarget2D _sceneBuffer;
     private readonly RenderTarget2D _lightingBuffer;
 
@@ -98,7 +98,8 @@ public class RenderingSystem : IRenderSystem
     /// </summary>
     private void RenderSceneBuffer()
     {
-        _graphicsDevice.WithRenderTarget(_sceneBuffer, () => {
+        _graphicsDevice.WithRenderTarget(_sceneBuffer, () =>
+        {
             _graphicsDevice.Clear(Color.Transparent);
             _tileRenderer.RenderTiles();
             _spriteRenderer.RenderSprites();

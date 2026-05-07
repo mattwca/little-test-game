@@ -1,3 +1,3 @@
 using Engine.ECS;
 
-public class ShadowComponent : IComponent {}
+public class ShadowComponent : IComponent { }

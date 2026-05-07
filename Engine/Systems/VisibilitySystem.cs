@@ -37,7 +37,7 @@ public class VisibilitySystem(EntityManager entityManager, GraphicsDevice graphi
             (int)transformedBottomRight.Y - (int)transformedTopLeft.Y
         );
 
-    foreach (var entity in entitiesToCheck)
+        foreach (var entity in entitiesToCheck)
         {
             var entityPosition = entity.GetComponent<PositionComponent>();
             var entityVisibility = entity.GetComponent<VisibilityComponent>();

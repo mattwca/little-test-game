@@ -1,9 +1,9 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
 using Engine.Components;
 using Engine.ECS;
+using Engine.Physics;
 using Engine.Rendering;
 using Engine.Utils;
 
@@ -20,7 +20,7 @@ public class PhysicsSystem : IUpdateSystem, IRenderSystem
     private readonly ShapeRenderer _shapeRenderer;
     private readonly QuadTree _quadTree;
 
-    private readonly List<Rectangle> _intersectResults;
+    private readonly List<RectangleF> _intersectResults;
 
     public PhysicsSystem(SpriteBatch spriteBatch, StateManager stateManager, EntityManager entityManager, ShapeRenderer shapeRenderer)
     {
@@ -30,7 +30,7 @@ public class PhysicsSystem : IUpdateSystem, IRenderSystem
         _shapeRenderer = shapeRenderer;
         _quadTree = new QuadTree(800, 600);
 
-        _intersectResults = new List<Rectangle>();
+        _intersectResults = new List<RectangleF>();
 
         BuildQuadTree();
     }
@@ -50,15 +50,15 @@ public class PhysicsSystem : IUpdateSystem, IRenderSystem
         // Render all static bounding boxes in the quad tree
         _quadTree.WalkTree((leaf) =>
         {
-            _shapeRenderer.RenderSquare(leaf.NodeBox, Color.Red);
+            _shapeRenderer.RenderSquare(leaf.NodeBox.ToRectangle(), Color.Red);
 
             foreach (var bb in leaf.BoundingBoxes)
             {
-                _shapeRenderer.RenderSquare(bb, Color.Red);
+                _shapeRenderer.RenderSquare(bb.ToRectangle(), Color.Red);
             }
         }, (branch) =>
         {
-            _shapeRenderer.RenderSquare(branch.NodeBox, Color.Red);
+            _shapeRenderer.RenderSquare(branch.NodeBox.ToRectangle(), Color.Red);
         });
 
         var entities = _entityManager
@@ -74,13 +74,13 @@ public class PhysicsSystem : IUpdateSystem, IRenderSystem
             foreach (var boundingBox in dynamicBoundingBoxes)
             {
                 var rectangle = GetBoundingRectangleForComponents(positionComponent, boundingBox);
-                _shapeRenderer.RenderSquare(rectangle, Color.Blue);
+                _shapeRenderer.RenderSquare(rectangle.ToRectangle(), Color.Blue);
             }
         }
 
         foreach (var intersectResult in _intersectResults)
         {
-            _shapeRenderer.RenderSquare(intersectResult, Color.Green);
+            _shapeRenderer.RenderSquare(intersectResult.ToRectangle(), Color.Green);
         }
 
         _spriteBatch.End();
@@ -106,7 +106,7 @@ public class PhysicsSystem : IUpdateSystem, IRenderSystem
 
             foreach (var intersector in intersectors)
             {
-                var intersectionResult = Rectangle.Intersect(boundingRect, intersector);
+                var intersectionResult = RectangleF.Intersect(boundingRect, intersector);
                 _intersectResults.Add(intersectionResult);
 
                 if (intersectionResult.Width < intersectionResult.Height)
@@ -135,10 +135,10 @@ public class PhysicsSystem : IUpdateSystem, IRenderSystem
         }
     }
 
-    private Rectangle GetBoundingRectangleForComponents(PositionComponent positionComponent, BoundingBoxComponent boundingBoxComponent)
+    private RectangleF GetBoundingRectangleForComponents(PositionComponent positionComponent, BoundingBoxComponent boundingBoxComponent)
     {
         var position = positionComponent.Position + boundingBoxComponent.Offset;
-        return new Rectangle((int)position.X, (int)position.Y, boundingBoxComponent.Width, boundingBoxComponent.Height);
+        return new RectangleF(position.X, position.Y, boundingBoxComponent.Width, boundingBoxComponent.Height);
     }
 
     private void BuildQuadTree()
@@ -153,7 +153,7 @@ public class PhysicsSystem : IUpdateSystem, IRenderSystem
             foreach (var bbComponent in boundingBoxComponents)
             {
                 var worldPosition = positionComponent.Position + bbComponent.Offset;
-                var bbRect = new Rectangle((int)worldPosition.X, (int)worldPosition.Y, bbComponent.Width, bbComponent.Height);
+                var bbRect = new RectangleF(worldPosition.X, worldPosition.Y, bbComponent.Width, bbComponent.Height);
 
                 _quadTree.AddIntersector(bbRect);
             }

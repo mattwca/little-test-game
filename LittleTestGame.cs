@@ -90,6 +90,7 @@ public class LittleTestGame : Game
             .AddComponent(new VisibilityComponent())
             .AddComponent(new AnimationComponent("playerWalking", 30))
             .AddComponent(new BoundingBoxComponent(new Vector2(0, 16), 32, 16, false));
+        // .AddComponent(new LightComponent(Color.LightBlue));
 
         _systemManager.EntityManager
             .CreateEntity("wall")

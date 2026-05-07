@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-using Engine.Components;
+using Engine.Physics;
 
 using Microsoft.Xna.Framework;
 
@@ -10,12 +10,12 @@ namespace Engine.Utils;
 
 public class QuadTreeNode
 {
-    public Rectangle NodeBox { get; }
+    public RectangleF NodeBox { get; }
     public int Depth { get; }
 
-    public QuadTreeNode(int x, int y, int width, int height, int depth)
+    public QuadTreeNode(float x, float y, float width, float height, int depth)
     {
-        NodeBox = new Rectangle(x, y, width, height);
+        NodeBox = new RectangleF(x, y, width, height);
         Depth = depth;
     }
 }
@@ -27,10 +27,10 @@ public class QuadTreeBranchNode : QuadTreeNode
     public QuadTreeNode BottomRight { get; set; }
     public QuadTreeNode BottomLeft { get; set; }
 
-    public QuadTreeBranchNode(int x, int y, int width, int height, int depth) : base(x, y, width, height, depth)
+    public QuadTreeBranchNode(float x, float y, float width, float height, int depth) : base(x, y, width, height, depth)
     {
-        int childWidth = width / 2;
-        int childHeight = height / 2;
+        var childWidth = width / 2f;
+        var childHeight = height / 2f;
 
         TopLeft = new QuadTreeLeafNode(x, y, childWidth, childHeight, depth + 1);
         TopRight = new QuadTreeLeafNode(x + childWidth, y, childWidth, childHeight, depth + 1);
@@ -41,9 +41,9 @@ public class QuadTreeBranchNode : QuadTreeNode
 
 public class QuadTreeLeafNode : QuadTreeNode
 {
-    public List<Rectangle> BoundingBoxes { get; }
+    public List<RectangleF> BoundingBoxes { get; }
 
-    public QuadTreeLeafNode(int x, int y, int width, int height, int depth) : base(x, y, width, height, depth)
+    public QuadTreeLeafNode(float x, float y, float width, float height, int depth) : base(x, y, width, height, depth)
     {
         BoundingBoxes = [];
     }
@@ -70,7 +70,8 @@ public class QuadTree
             return node;
         }
 
-        if (node is QuadTreeLeafNode leafNode) {
+        if (node is QuadTreeLeafNode leafNode)
+        {
             if (leafNode.BoundingBoxes.Count < MaxBoundingBoxesCount || leafNode.Depth >= MaximumTreeDepth)
             {
                 return node;
@@ -107,7 +108,7 @@ public class QuadTree
         return node;
     }
 
-    public void AddIntersector(Rectangle boundingBox)
+    public void AddIntersector(RectangleF boundingBox)
     {
         // find the leaf node(s) that contain this bounding box and add it to them.
         WalkTree(_rootNode, (leaf) =>
@@ -128,7 +129,8 @@ public class QuadTree
         });
     }
 
-    public List<Rectangle> GetIntersectors(Rectangle boundingBox) {
+    public List<RectangleF> GetIntersectors(RectangleF boundingBox)
+    {
         var results = GetIntersectorsInternal(_rootNode, boundingBox);
         return results.Distinct().ToList();
     }
@@ -138,9 +140,9 @@ public class QuadTree
         this.WalkTree(_rootNode, leafAction, branchAction);
     }
 
-    private List<Rectangle> GetIntersectorsInternal(QuadTreeNode node, Rectangle boundingBox)
+    private List<RectangleF> GetIntersectorsInternal(QuadTreeNode node, RectangleF boundingBox)
     {
-        var intersectors = new List<Rectangle>();
+        var intersectors = new List<RectangleF>();
 
         if (node is QuadTreeLeafNode leafNode)
         {

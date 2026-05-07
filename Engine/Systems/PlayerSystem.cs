@@ -57,18 +57,18 @@ public class PlayerSystem : IUpdateSystem
         {
             movementVector.Y -= 1;
         }
-        
+
         if (Keyboard.GetState().IsKeyDown(Keys.S))
         {
             movementVector.Y += 1;
         }
-        
+
         if (Keyboard.GetState().IsKeyDown(Keys.A))
         {
             movementVector.X -= 1;
             renderingComponent.FlipX = false;
         }
-        
+
         if (Keyboard.GetState().IsKeyDown(Keys.D))
         {
             movementVector.X += 1;

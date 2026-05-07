@@ -38,7 +38,7 @@ public class CameraSystem : IUpdateSystem
 
         var newPosition = entityPosition.Position - new Vector2(screenWidth / 2, screenHeight / 2);
         newPosition.Round();
-        
+
         cameraComponent.Position = newPosition;
     }
 }
