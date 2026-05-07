@@ -1,6 +1,7 @@
 using System;
 
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 
 namespace Engine.Physics;
 
@@ -15,6 +16,8 @@ public struct RectangleF(float x, float y, float width, float height)
     public readonly float Right => X + Width;
     public readonly float Top => Y;
     public readonly float Bottom => Y + Height;
+
+    public readonly Vector2 Centre => new(X + Width / 2f, Y + Height / 2f);
 
     public readonly bool Intersects(RectangleF rectangle)
     {

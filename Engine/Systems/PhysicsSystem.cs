@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -106,31 +107,48 @@ public class PhysicsSystem : IUpdateSystem, IRenderSystem
 
             foreach (var intersector in intersectors)
             {
-                var intersectionResult = RectangleF.Intersect(boundingRect, intersector);
-                _intersectResults.Add(intersectionResult);
+                var entityCentre = boundingRect.Centre;
+                var intersectorCentre = intersector.Centre;
 
-                if (intersectionResult.Width < intersectionResult.Height)
+                var intersectionDirection = entityCentre - intersectorCentre;
+                var overlapX = (boundingRect.Width + intersector.Width) / 2f - Math.Abs(intersectionDirection.X);
+                var overlapY = (boundingRect.Height + intersector.Height) / 2f - Math.Abs(intersectionDirection.Y);
+
+                if (overlapX < overlapY)
                 {
-                    if (intersectionResult.X < positionComponent.Position.X)
-                    {
-                        positionComponent.Position += new Vector2(intersectionResult.Width, 0);
-                    }
-                    else
-                    {
-                        positionComponent.Position -= new Vector2(intersectionResult.Width, 0);
-                    }
-                }
-                else
+                    positionComponent.Position += new Vector2(Math.Sign(intersectionDirection.X) * overlapX, 0);
+                } else
                 {
-                    if (intersectionResult.Y > boundingRect.Y)
-                    {
-                        positionComponent.Position -= new Vector2(0, intersectionResult.Height);
-                    }
-                    else
-                    {
-                        positionComponent.Position += new Vector2(0, intersectionResult.Height);
-                    }
+                    positionComponent.Position += new Vector2(0, Math.Sign(intersectionDirection.Y) * overlapY);
                 }
+
+                // var intersectionResult = RectangleF.Intersect(boundingRect, intersector);
+                // _intersectResults.Add(intersectionResult);
+
+                // if (intersectionResult.Width < intersectionResult.Height)
+                // {
+                //     if (intersectionResult.X < positionComponent.Position.X)
+                //     {
+                //         positionComponent.Position += new Vector2(intersectionResult.Width, 0);
+                //     }
+                //     else
+                //     {
+                //         positionComponent.Position -= new Vector2(intersectionResult.Width, 0);
+                //     }
+                // }
+                // else
+                // {
+                //     if (intersectionResult.Y > boundingRect.Y)
+                //     {
+                //         positionComponent.Position -= new Vector2(0, intersectionResult.Height);
+                //     }
+                //     else
+                //     {
+                //         positionComponent.Position += new Vector2(0, intersectionResult.Height);
+                //     }
+                // }
+
+                boundingRect = GetBoundingRectangleForComponents(positionComponent, boundingBoxComponent);
             }
         }
     }

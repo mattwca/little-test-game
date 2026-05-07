@@ -159,6 +159,7 @@ public class LittleTestGame : Game
 
         _systemManager.AddSystem<VisibilitySystem>();
         _systemManager.AddSystem<PlayerSystem>();
+        _systemManager.AddSystem<PhysicsSystem>();
 
         _systemManager.AddSystem<AnimationSystem>();
 
@@ -168,7 +169,6 @@ public class LittleTestGame : Game
 
         _systemManager.Register(_systemManager.Construct<TileRenderer>());
         _systemManager.AddSystem<RenderingSystem>();
-        _systemManager.AddSystem<PhysicsSystem>();
         _systemManager.AddSystem<CameraSystem>();
     }
 
