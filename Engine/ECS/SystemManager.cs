@@ -84,7 +84,10 @@ public class SystemManager
 
     public void Render(GameTime gameTime)
     {
-        _renderSystems.ForEach(system => system.Draw(gameTime));
+        _renderSystems
+            .OrderBy(system => system is IRenderSystemOrder renderSystemOrder ? renderSystemOrder.RenderOrder : int.MaxValue)
+            .ToList()
+            .ForEach(system => system.Draw(gameTime));
     }
 
     private object Resolve(Type type)

@@ -12,7 +12,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Engine.Lighting;
 
-public class LightSystem : IRenderSystem, IUpdateSystem
+public class LightSystem : IRenderSystem, IUpdateSystem, IRenderSystemOrder
 {
     private readonly EntityManager _entityManager;
     private readonly ContentManager _contentManager;
@@ -25,6 +25,7 @@ public class LightSystem : IRenderSystem, IUpdateSystem
     private readonly Effect _shadowMapEffect;
 
     public Dictionary<string, RenderTarget2D> ShadowMaps { get; }
+    public int RenderOrder { get => 0; }
 
     public LightSystem(
         EntityManager entityManager,

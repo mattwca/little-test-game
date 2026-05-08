@@ -10,7 +10,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Engine.Systems;
 
-public class RenderingSystem : IRenderSystem
+public class RenderingSystem : IRenderSystem, IRenderSystemOrder
 {
     private readonly GraphicsDevice _graphicsDevice;
     private readonly ContentManager _contentManager;
@@ -27,6 +27,8 @@ public class RenderingSystem : IRenderSystem
 
     private readonly RenderTarget2D _sceneBuffer;
     private readonly RenderTarget2D _lightingBuffer;
+
+    public int RenderOrder { get => 1; }
 
     private static readonly BlendState MultiplyBlend = new()
     {

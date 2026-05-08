@@ -19,8 +19,8 @@ public class PhysicsSystem : IUpdateSystem, IRenderSystem
     private readonly StateManager _stateManager;
     private readonly EntityManager _entityManager;
     private readonly ShapeRenderer _shapeRenderer;
-    private readonly QuadTree _quadTree;
 
+    private readonly QuadTree _quadTree;
     private readonly List<RectangleF> _intersectResults;
 
     public PhysicsSystem(SpriteBatch spriteBatch, StateManager stateManager, EntityManager entityManager, ShapeRenderer shapeRenderer)
@@ -29,8 +29,8 @@ public class PhysicsSystem : IUpdateSystem, IRenderSystem
         _stateManager = stateManager;
         _entityManager = entityManager;
         _shapeRenderer = shapeRenderer;
-        _quadTree = new QuadTree(800, 600);
 
+        _quadTree = new QuadTree(800, 600);
         _intersectResults = new List<RectangleF>();
 
         BuildQuadTree();
