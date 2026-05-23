@@ -10,7 +10,6 @@ namespace Engine.Rendering;
 public class TileRenderer(EntityManager entityManager, GraphicsDevice graphicsDevice, SpriteBatch spriteBatch, Helper helper)
 {
     private readonly EntityManager _entityManager = entityManager;
-    private readonly GraphicsDevice _graphicsDevice = graphicsDevice;
     private readonly SpriteBatch _spriteBatch = spriteBatch;
     private readonly Helper _helper = helper;
 

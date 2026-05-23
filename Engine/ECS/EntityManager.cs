@@ -12,6 +12,11 @@ public class EntityManager
         Entities = [];
     }
 
+    public void AddEntity(Entity entity)
+    {
+        Entities.Add(entity);
+    }
+
     public Entity CreateEntity(string id)
     {
         var entity = new Entity(id);
