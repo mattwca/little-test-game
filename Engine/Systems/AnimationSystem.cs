@@ -21,7 +21,10 @@ public class AnimationSystem : IUpdateSystem
 
     public void Update(GameTime gameTime)
     {
-        var entitiesWithAnimation = _entityManager.GetEntitiesWithComponents(typeof(AnimationComponent), typeof(RenderingComponent));
+        var entitiesWithAnimation = _entityManager.GetEntitiesWithComponents(
+            typeof(AnimationComponent),
+            typeof(RenderingComponent)
+        );
 
         foreach (var entity in entitiesWithAnimation)
         {
@@ -39,12 +42,7 @@ public class AnimationSystem : IUpdateSystem
             var xCoord = animation.FrameWidth * currentFrameIndex;
             var yCoord = 0;
 
-            var sourceRectangle = new Rectangle(
-                xCoord,
-                yCoord,
-                animation.FrameWidth,
-                animation.FrameHeight
-            );
+            var sourceRectangle = new Rectangle(xCoord, yCoord, animation.FrameWidth, animation.FrameHeight);
 
             renderingComponent.SourceRectangle = sourceRectangle;
         }

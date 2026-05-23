@@ -8,11 +8,11 @@ namespace Engine.ECS;
 
 /// <summary>
 /// The System Manager, acts as a DI container for update and render systems.
-/// 
+///
 /// Exposes `update` and `render` methods which should be called as part of the game loop,
 /// and will invoke each registered system. Systems are invoked in the order that they are
 /// registered.
-/// 
+///
 /// Note that dependencies are constructed as and when they are registered - they are not
 /// invoked lazily.
 /// </summary>
@@ -39,26 +39,28 @@ public class SystemManager
         _renderSystems = [];
     }
 
-    public SystemManager Register<T>(T dependency) where T : class
+    public SystemManager Register<T>(T dependency)
+        where T : class
     {
         _serviceCollection[typeof(T)] = dependency;
         return this;
     }
 
-    public T Construct<T>() where T : class
+    public T Construct<T>()
+        where T : class
     {
         var type = typeof(T);
-        var constructor = type.GetConstructors().FirstOrDefault()
+        var constructor =
+            type.GetConstructors().FirstOrDefault()
             ?? throw new InvalidOperationException($"{type.Name} has no public constructor.");
 
-        var parameters = constructor.GetParameters()
-            .Select(p => Resolve(p.ParameterType))
-            .ToArray();
+        var parameters = constructor.GetParameters().Select(p => Resolve(p.ParameterType)).ToArray();
 
         return (T)constructor.Invoke(parameters);
     }
 
-    public T AddSystem<T>() where T : class
+    public T AddSystem<T>()
+        where T : class
     {
         var system = Construct<T>();
 
@@ -85,7 +87,9 @@ public class SystemManager
     public void Render(GameTime gameTime)
     {
         _renderSystems
-            .OrderBy(system => system is IRenderSystemOrder renderSystemOrder ? renderSystemOrder.RenderOrder : int.MaxValue)
+            .OrderBy(system =>
+                system is IRenderSystemOrder renderSystemOrder ? renderSystemOrder.RenderOrder : int.MaxValue
+            )
             .ToList()
             .ForEach(system => system.Draw(gameTime));
     }

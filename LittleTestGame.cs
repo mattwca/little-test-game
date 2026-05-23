@@ -43,50 +43,68 @@ public class LittleTestGame : Game
         var animationManager = new AnimationManager();
         animationManager.AddAnimation(new Animation("playerWalking", 6, 32, 32));
 
-        _systemManager
-            .Register(_spriteBatch)
-            .Register(GraphicsDevice)
-            .Register(Content)
-            .Register(animationManager);
+        _systemManager.Register(_spriteBatch).Register(GraphicsDevice).Register(Content).Register(animationManager);
 
         _systemManager.Register(_systemManager.Construct<Helper>());
         _systemManager.Register(_systemManager.Construct<ShapeRenderer>());
 
-        _systemManager.EntityManager
-            .CreateEntity("camera")
+        _systemManager
+            .EntityManager.CreateEntity("camera")
             .AddComponent(new CameraComponent(new Vector2(0, 0), 2f, "player"));
 
-        _systemManager.EntityManager
-            .CreateEntity("map")
+        _systemManager
+            .EntityManager.CreateEntity("map")
             .AddComponent(new PositionComponent(new Vector2(0, 0)))
-            .AddComponent(new TiledRenderingComponent(Content.Load<Texture2D>("floorTile"), 32, 100, 100, Color.White, new Vector2(0, 0), 0, 1f));
+            .AddComponent(
+                new TiledRenderingComponent(
+                    Content.Load<Texture2D>("floorTile"),
+                    32,
+                    100,
+                    100,
+                    Color.White,
+                    new Vector2(0, 0),
+                    0,
+                    1f
+                )
+            );
 
-        _systemManager.EntityManager
-            .CreateEntity("light")
+        _systemManager
+            .EntityManager.CreateEntity("light")
             .AddComponent(new PositionComponent(new Vector2(150, 150), 32, 32))
             .AddComponent(new LightComponent(Color.Gold, 100))
             .AddComponent(new RenderingComponent(Content.Load<Texture2D>("light"), Color.White, castsShadow: false))
             .AddComponent(new VisibilityComponent(offset: 50));
 
-        _systemManager.EntityManager
-            .CreateEntity("light2")
+        _systemManager
+            .EntityManager.CreateEntity("light2")
             .AddComponent(new PositionComponent(new Vector2(400, 250), 32, 32))
             .AddComponent(new LightComponent(Color.Gold, 100))
             .AddComponent(new RenderingComponent(Content.Load<Texture2D>("light"), Color.White, castsShadow: false))
             .AddComponent(new VisibilityComponent(offset: 50));
 
-        _systemManager.EntityManager
-            .CreateEntity("light3")
+        _systemManager
+            .EntityManager.CreateEntity("light3")
             .AddComponent(new PositionComponent(new Vector2(350, 50), 32, 32))
             .AddComponent(new LightComponent(Color.Gold, 100))
             .AddComponent(new RenderingComponent(Content.Load<Texture2D>("light"), Color.White, castsShadow: false))
             .AddComponent(new VisibilityComponent(offset: 50));
 
-        _systemManager.EntityManager
-            .CreateEntity("player")
+        _systemManager
+            .EntityManager.CreateEntity("player")
             .AddComponent(new PositionComponent(new Vector2(150, 50), 32, 32))
-            .AddComponent(new RenderingComponent(Content.Load<Texture2D>("player"), Color.White, layer: 2, castsShadow: true))
-            .AddComponent(new RenderingComponent(Content.Load<Texture2D>("shadow"), new Color(255, 255, 255, 128), new Vector2(8, 24), layer: 1, 0.5f, castsShadow: false))
+            .AddComponent(
+                new RenderingComponent(Content.Load<Texture2D>("player"), Color.White, layer: 2, castsShadow: true)
+            )
+            .AddComponent(
+                new RenderingComponent(
+                    Content.Load<Texture2D>("shadow"),
+                    new Color(255, 255, 255, 128),
+                    new Vector2(8, 24),
+                    layer: 1,
+                    0.5f,
+                    castsShadow: false
+                )
+            )
             .AddComponent(new PlayerComponent())
             .AddComponent(new VisibilityComponent())
             .AddComponent(new AnimationComponent("playerWalking", 30))
@@ -158,8 +176,18 @@ public class LittleTestGame : Game
         //     .AddComponent(new BoundingBoxComponent(new Vector2(32, 32), 32, 32))
         //     .AddComponent(new BoundingBoxComponent(new Vector2(64, 32), 32, 32));
 
-        _systemManager.EntityManager.CreateEntity("mapBase")
-            .AddComponent(new MapComponent(WallTileDefinitions.Definition, [[0, 0], [0, 0]], 1))
+        _systemManager
+            .EntityManager.CreateEntity("mapBase")
+            .AddComponent(
+                new MapComponent(
+                    WallTileDefinitions.Definition,
+                    [
+                        [0, 0],
+                        [0, 0],
+                    ],
+                    1
+                )
+            )
             .AddComponent(new PositionComponent(new Vector2(0, 0)));
 
         // var map = new Map("base", new Vector2(0, 0), [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]], WallTileDefinitions.Definition);
@@ -189,7 +217,10 @@ public class LittleTestGame : Game
 
     protected override void Update(GameTime gameTime)
     {
-        if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+        if (
+            GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed
+            || Keyboard.GetState().IsKeyDown(Keys.Escape)
+        )
             Exit();
 
         _systemManager.Update(gameTime);

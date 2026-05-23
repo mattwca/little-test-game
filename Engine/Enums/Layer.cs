@@ -8,5 +8,5 @@ public enum Layer
     PLAYER = 3,
     PLAYER_1 = 4,
     PLAYER_2 = 5,
-    FOREGROUND = 6
+    FOREGROUND = 6,
 }

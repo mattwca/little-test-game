@@ -19,12 +19,12 @@ public class TileDefinitionMatcher : ITileDefinitionMatcher
         var tileBelow = IsTileOccupied(tileX, tileY + 1);
         var tileLeft = IsTileOccupied(tileX - 1, tileY);
         var tileRight = IsTileOccupied(tileX + 1, tileY);
-        
+
         var mask =
-            (tileAbove ? TileNeighbours.Above : 0) |
-            (tileBelow ? TileNeighbours.Below : 0) |
-            (tileLeft ? TileNeighbours.Left : 0) |
-            (tileRight ? TileNeighbours.Right : 0);
+            (tileAbove ? TileNeighbours.Above : 0)
+            | (tileBelow ? TileNeighbours.Below : 0)
+            | (tileLeft ? TileNeighbours.Left : 0)
+            | (tileRight ? TileNeighbours.Right : 0);
 
         return _mapDefinition.TileDefinitions.First((definition) => definition.Neighbours == mask);
     }

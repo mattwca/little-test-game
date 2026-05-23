@@ -29,7 +29,10 @@ public class RenderingSystem : IRenderSystem, IRenderSystemOrder
     private readonly RenderTarget2D _sceneBuffer;
     private readonly RenderTarget2D _lightingBuffer;
 
-    public int RenderOrder { get => 1; }
+    public int RenderOrder
+    {
+        get => 1;
+    }
 
     private static readonly BlendState MultiplyBlend = new()
     {
@@ -37,7 +40,17 @@ public class RenderingSystem : IRenderSystem, IRenderSystemOrder
         ColorDestinationBlend = Blend.Zero,
     };
 
-    public RenderingSystem(GraphicsDevice graphicsDevice, ContentManager contentManager, StateManager stateManager, LightSystem lightSystem, SpriteBatch spriteBatch, Helper helper, SpriteRenderer spriteRenderer, TileRenderer tileRenderer, AutoTileRenderer autoTileRenderer)
+    public RenderingSystem(
+        GraphicsDevice graphicsDevice,
+        ContentManager contentManager,
+        StateManager stateManager,
+        LightSystem lightSystem,
+        SpriteBatch spriteBatch,
+        Helper helper,
+        SpriteRenderer spriteRenderer,
+        TileRenderer tileRenderer,
+        AutoTileRenderer autoTileRenderer
+    )
     {
         _graphicsDevice = graphicsDevice;
         _contentManager = contentManager;
@@ -53,8 +66,16 @@ public class RenderingSystem : IRenderSystem, IRenderSystemOrder
 
         _lightingEffect = _contentManager.Load<Effect>("Effects/LightingEffect");
 
-        _sceneBuffer = new RenderTarget2D(_graphicsDevice, _graphicsDevice.Viewport.Width, _graphicsDevice.Viewport.Height);
-        _lightingBuffer = new RenderTarget2D(_graphicsDevice, _graphicsDevice.Viewport.Width, _graphicsDevice.Viewport.Height);
+        _sceneBuffer = new RenderTarget2D(
+            _graphicsDevice,
+            _graphicsDevice.Viewport.Width,
+            _graphicsDevice.Viewport.Height
+        );
+        _lightingBuffer = new RenderTarget2D(
+            _graphicsDevice,
+            _graphicsDevice.Viewport.Width,
+            _graphicsDevice.Viewport.Height
+        );
     }
 
     public void Draw(GameTime gameTime)
@@ -102,40 +123,46 @@ public class RenderingSystem : IRenderSystem, IRenderSystemOrder
     /// </summary>
     private void RenderSceneBuffer()
     {
-        _graphicsDevice.WithRenderTarget(_sceneBuffer, () =>
-        {
-            _graphicsDevice.Clear(Color.Transparent);
-            _tileRenderer.RenderTiles();
-            _autoTileRenderer.RenderMaps();
-            _spriteRenderer.RenderSprites();
-        });
+        _graphicsDevice.WithRenderTarget(
+            _sceneBuffer,
+            () =>
+            {
+                _graphicsDevice.Clear(Color.Transparent);
+                _tileRenderer.RenderTiles();
+                _autoTileRenderer.RenderMaps();
+                _spriteRenderer.RenderSprites();
+            }
+        );
     }
 
     /// <summary>
     /// Renders each of the light sources to the lighting buffer render texture. This is a buffer
     /// which contains the accumulation of each light's contribution to the scene.
-    /// 
+    ///
     /// We clear the backbuffer with an ambient "unlit" colour, before rendering each of the lights
     /// to the buffer.
     /// </summary>
     private void RenderLightingBuffer()
     {
-        _graphicsDevice.WithRenderTarget(_lightingBuffer, () =>
-        {
-            // Ambient base colour for unlit pixels.
-            _graphicsDevice.Clear(new Color(0.7f, 0.7f, 0.7f, 1.0f));
-
-            // Render the lighting contributions to the buffer.
-            /// - Pixels which aren't obscured by a shadow (are lit) add the light's colour, scaled by its
-            ///   falloff curve.
-            /// - Pixels which are shadowed, or are outside the light's radius, emit nothing, leaving the
-            ///   ambient base colour.
-            var visibleLights = _lightSystem.GetVisibleLights();
-            foreach (var light in visibleLights)
+        _graphicsDevice.WithRenderTarget(
+            _lightingBuffer,
+            () =>
             {
-                RenderLightingPass(light);
+                // Ambient base colour for unlit pixels.
+                _graphicsDevice.Clear(new Color(0.7f, 0.7f, 0.7f, 1.0f));
+
+                // Render the lighting contributions to the buffer.
+                /// - Pixels which aren't obscured by a shadow (are lit) add the light's colour, scaled by its
+                ///   falloff curve.
+                /// - Pixels which are shadowed, or are outside the light's radius, emit nothing, leaving the
+                ///   ambient base colour.
+                var visibleLights = _lightSystem.GetVisibleLights();
+                foreach (var light in visibleLights)
+                {
+                    RenderLightingPass(light);
+                }
             }
-        });
+        );
     }
 
     private void RenderLightingPass(Entity lightEntity)
@@ -147,7 +174,9 @@ public class RenderingSystem : IRenderSystem, IRenderSystemOrder
         var screenSize = new Vector2(_graphicsDevice.Viewport.Width, _graphicsDevice.Viewport.Height);
         var cameraTransform = _helper.GetCameraTransform();
 
-        _lightingEffect.Parameters["LightPosition"].SetValue(Vector2.Transform(lightPositionComponent.Centre, cameraTransform));
+        _lightingEffect
+            .Parameters["LightPosition"]
+            .SetValue(Vector2.Transform(lightPositionComponent.Centre, cameraTransform));
         _lightingEffect.Parameters["LightColour"].SetValue(lightComponent.Colour.ToVector4());
         _lightingEffect.Parameters["LightRadius"].SetValue(lightComponent.Radius / _graphicsDevice.Viewport.Height);
         _lightingEffect.Parameters["ScreenSize"].SetValue(screenSize);

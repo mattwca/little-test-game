@@ -35,7 +35,7 @@ public class PlayerSystem : IUpdateSystem
     {
         if (_keyboardHandler.WasKeyPressed(Keys.OemTilde))
         {
-            _stateManager.ToggleBool("renderBoundingBoxes");
+            _stateManager.ToggleBool("debugModeEnabled");
         }
 
         if (_keyboardHandler.WasKeyPressed(Keys.P))

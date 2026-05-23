@@ -7,7 +7,12 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Engine.Rendering;
 
-public class TileRenderer(EntityManager entityManager, GraphicsDevice graphicsDevice, SpriteBatch spriteBatch, Helper helper)
+public class TileRenderer(
+    EntityManager entityManager,
+    GraphicsDevice graphicsDevice,
+    SpriteBatch spriteBatch,
+    Helper helper
+)
 {
     private readonly EntityManager _entityManager = entityManager;
     private readonly SpriteBatch _spriteBatch = spriteBatch;
@@ -18,7 +23,10 @@ public class TileRenderer(EntityManager entityManager, GraphicsDevice graphicsDe
         var cameraTransform = _helper.GetCameraTransform();
         _spriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: cameraTransform);
 
-        var tiledRenderEntities = _entityManager.GetEntitiesWithComponents(typeof(PositionComponent), typeof(TiledRenderingComponent));
+        var tiledRenderEntities = _entityManager.GetEntitiesWithComponents(
+            typeof(PositionComponent),
+            typeof(TiledRenderingComponent)
+        );
 
         foreach (var entity in tiledRenderEntities)
         {
@@ -30,7 +38,9 @@ public class TileRenderer(EntityManager entityManager, GraphicsDevice graphicsDe
                 for (int y = 0; y < tiledRenderComponent.TilesY; y++)
                 {
                     var worldPosition = positionComponent.Position + tiledRenderComponent.Offset;
-                    var tilePosition = worldPosition + new Vector2(x * tiledRenderComponent.TileSize, y * tiledRenderComponent.TileSize);
+                    var tilePosition =
+                        worldPosition
+                        + new Vector2(x * tiledRenderComponent.TileSize, y * tiledRenderComponent.TileSize);
                     _spriteBatch.Draw(tiledRenderComponent.Texture, tilePosition, tiledRenderComponent.Colour);
                 }
             }

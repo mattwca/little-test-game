@@ -38,7 +38,12 @@ public struct RectangleF(float x, float y, float width, float height)
             float intersectMaxX = Math.Min(rect1.X + rect1.Width, rect2.X + rect2.Width);
             float intersectMaxY = Math.Min(rect1.Y + rect1.Height, rect2.Y + rect2.Height);
 
-            var result = new RectangleF(intersectMinX, intersectMinY, intersectMaxX - intersectMinX, intersectMaxY - intersectMinY);
+            var result = new RectangleF(
+                intersectMinX,
+                intersectMinY,
+                intersectMaxX - intersectMinX,
+                intersectMaxY - intersectMinY
+            );
             return result;
         }
 

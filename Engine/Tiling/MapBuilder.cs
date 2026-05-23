@@ -7,7 +7,7 @@ namespace Engine.Tiling;
 
 public class MapBuilder
 {
-    private ContentManager _contentManager;
+    private readonly ContentManager _contentManager;
 
     public MapBuilder(ContentManager contentManager)
     {

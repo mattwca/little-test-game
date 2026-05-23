@@ -21,7 +21,13 @@ public class SpriteRenderer
 
     private readonly Effect _spriteEffect;
 
-    public SpriteRenderer(ContentManager contentManager, GraphicsDevice graphicsDevice, EntityManager entityManager, SpriteBatch spriteBatch, Helper helper)
+    public SpriteRenderer(
+        ContentManager contentManager,
+        GraphicsDevice graphicsDevice,
+        EntityManager entityManager,
+        SpriteBatch spriteBatch,
+        Helper helper
+    )
     {
         _contentManager = contentManager;
         _graphicsDevice = graphicsDevice;
@@ -37,7 +43,11 @@ public class SpriteRenderer
         var cameraTransform = _helprer.GetCameraTransform();
 
         var entitiesToRender = _entityManager
-            .GetEntitiesWithComponents(typeof(PositionComponent), typeof(RenderingComponent), typeof(VisibilityComponent))
+            .GetEntitiesWithComponents(
+                typeof(PositionComponent),
+                typeof(RenderingComponent),
+                typeof(VisibilityComponent)
+            )
             .Where((entity) => entity.GetComponent<VisibilityComponent>().IsVisible)
             .SelectMany(
                 (entity) =>
@@ -45,21 +55,24 @@ public class SpriteRenderer
                     var positionComponent = entity.GetComponent<PositionComponent>();
                     var renderingComponents = entity.GetComponents<RenderingComponent>();
 
-                    return renderingComponents.Select((renderingComponent) =>
-                    (
-                        positionComponent,
-                        renderingComponent
-                    ));
+                    return renderingComponents.Select((renderingComponent) => (positionComponent, renderingComponent));
                 }
             )
             .Where((components) => filter == null ? true : filter(components.renderingComponent));
 
-        _spriteBatch.Begin(sortMode: SpriteSortMode.FrontToBack, samplerState: SamplerState.PointClamp, transformMatrix: cameraTransform, effect: _spriteEffect);
+        _spriteBatch.Begin(
+            sortMode: SpriteSortMode.FrontToBack,
+            samplerState: SamplerState.PointClamp,
+            transformMatrix: cameraTransform,
+            effect: _spriteEffect
+        );
 
         foreach (var (positionComponent, renderingComponent) in entitiesToRender)
         {
             var worldPosition = positionComponent.Position + renderingComponent.Offset;
-            var spriteEffect = (renderingComponent.FlipX ? SpriteEffects.FlipHorizontally : SpriteEffects.None) | (renderingComponent.FlipY ? SpriteEffects.FlipVertically : SpriteEffects.None);
+            var spriteEffect =
+                (renderingComponent.FlipX ? SpriteEffects.FlipHorizontally : SpriteEffects.None)
+                | (renderingComponent.FlipY ? SpriteEffects.FlipVertically : SpriteEffects.None);
 
             _spriteBatch.Draw(
                 renderingComponent.Texture,
@@ -76,5 +89,4 @@ public class SpriteRenderer
 
         _spriteBatch.End();
     }
-
 }

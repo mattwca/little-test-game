@@ -23,7 +23,12 @@ public class PhysicsSystem : IUpdateSystem, IRenderSystem
     private readonly QuadTree _quadTree;
     private readonly List<RectangleF> _intersectResults;
 
-    public PhysicsSystem(SpriteBatch spriteBatch, StateManager stateManager, EntityManager entityManager, ShapeRenderer shapeRenderer)
+    public PhysicsSystem(
+        SpriteBatch spriteBatch,
+        StateManager stateManager,
+        EntityManager entityManager,
+        ShapeRenderer shapeRenderer
+    )
     {
         _spriteBatch = spriteBatch;
         _stateManager = stateManager;
@@ -38,7 +43,7 @@ public class PhysicsSystem : IUpdateSystem, IRenderSystem
 
     public void Draw(GameTime gameTime)
     {
-        if (!_stateManager.GetBool("renderBoundingBoxes"))
+        if (!_stateManager.GetBool("debugModeEnabled"))
         {
             return;
         }
@@ -49,18 +54,21 @@ public class PhysicsSystem : IUpdateSystem, IRenderSystem
         _spriteBatch.Begin(transformMatrix: cameraComponent.Transform, blendState: BlendState.AlphaBlend);
 
         // Render all static bounding boxes in the quad tree
-        _quadTree.WalkTree((leaf) =>
-        {
-            _shapeRenderer.RenderSquare(leaf.NodeBox.ToRectangle(), Color.Red);
-
-            foreach (var bb in leaf.BoundingBoxes)
+        _quadTree.WalkTree(
+            (leaf) =>
             {
-                _shapeRenderer.RenderSquare(bb.ToRectangle(), Color.Red);
+                _shapeRenderer.RenderSquare(leaf.NodeBox.ToRectangle(), Color.Red);
+
+                foreach (var bb in leaf.BoundingBoxes)
+                {
+                    _shapeRenderer.RenderSquare(bb.ToRectangle(), Color.Red);
+                }
+            },
+            (branch) =>
+            {
+                _shapeRenderer.RenderSquare(branch.NodeBox.ToRectangle(), Color.Red);
             }
-        }, (branch) =>
-        {
-            _shapeRenderer.RenderSquare(branch.NodeBox.ToRectangle(), Color.Red);
-        });
+        );
 
         var entities = _entityManager
             .GetEntitiesWithComponents(typeof(PositionComponent), typeof(BoundingBoxComponent))
@@ -90,9 +98,9 @@ public class PhysicsSystem : IUpdateSystem, IRenderSystem
     public void Update(GameTime gameTime)
     {
         var dynamicBoundingEntities = _entityManager.Entities.Where(entity =>
-            entity.HasComponent<PositionComponent>() &&
-            entity.HasComponent<BoundingBoxComponent>() &&
-            !entity.GetComponent<BoundingBoxComponent>().IsStatic
+            entity.HasComponent<PositionComponent>()
+            && entity.HasComponent<BoundingBoxComponent>()
+            && !entity.GetComponent<BoundingBoxComponent>().IsStatic
         );
 
         _intersectResults.Clear();
@@ -117,7 +125,8 @@ public class PhysicsSystem : IUpdateSystem, IRenderSystem
                 if (overlapX < overlapY)
                 {
                     positionComponent.Position += new Vector2(Math.Sign(intersectionDirection.X) * overlapX, 0);
-                } else
+                }
+                else
                 {
                     positionComponent.Position += new Vector2(0, Math.Sign(intersectionDirection.Y) * overlapY);
                 }
@@ -153,7 +162,10 @@ public class PhysicsSystem : IUpdateSystem, IRenderSystem
         }
     }
 
-    private RectangleF GetBoundingRectangleForComponents(PositionComponent positionComponent, BoundingBoxComponent boundingBoxComponent)
+    private RectangleF GetBoundingRectangleForComponents(
+        PositionComponent positionComponent,
+        BoundingBoxComponent boundingBoxComponent
+    )
     {
         var position = positionComponent.Position + boundingBoxComponent.Offset;
         return new RectangleF(position.X, position.Y, boundingBoxComponent.Width, boundingBoxComponent.Height);
@@ -161,7 +173,10 @@ public class PhysicsSystem : IUpdateSystem, IRenderSystem
 
     private void BuildQuadTree()
     {
-        var boundingBoxEntities = _entityManager.GetEntitiesWithComponents(typeof(BoundingBoxComponent), typeof(PositionComponent));
+        var boundingBoxEntities = _entityManager.GetEntitiesWithComponents(
+            typeof(BoundingBoxComponent),
+            typeof(PositionComponent)
+        );
 
         foreach (var entity in boundingBoxEntities)
         {

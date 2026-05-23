@@ -16,7 +16,8 @@ public class Entity
         _components = new Dictionary<Type, List<IComponent>>();
     }
 
-    public Entity AddComponent<T>(T component) where T : IComponent
+    public Entity AddComponent<T>(T component)
+        where T : IComponent
     {
         var componentType = typeof(T);
 
@@ -30,10 +31,13 @@ public class Entity
         return this;
     }
 
-    public bool HasComponent<T>() where T : IComponent => _components.ContainsKey(typeof(T));
+    public bool HasComponent<T>()
+        where T : IComponent => _components.ContainsKey(typeof(T));
+
     public bool HasComponents(params Type[] components) => components.All(c => _components.ContainsKey(c));
 
-    public void RemoveComponent<T>(T component) where T : IComponent
+    public void RemoveComponent<T>(T component)
+        where T : IComponent
     {
         var componentType = typeof(T);
 
@@ -50,7 +54,8 @@ public class Entity
         }
     }
 
-    public T GetComponent<T>() where T : IComponent
+    public T GetComponent<T>()
+        where T : IComponent
     {
         if (_components.ContainsKey(typeof(T)))
         {
@@ -60,7 +65,8 @@ public class Entity
         throw new Exception($"Entity {Id} does not have component of type {typeof(T)}");
     }
 
-    public T[] GetComponentsWith<T>(Func<T, bool> predicate) where T : IComponent
+    public T[] GetComponentsWith<T>(Func<T, bool> predicate)
+        where T : IComponent
     {
         if (_components.ContainsKey(typeof(T)))
         {
@@ -70,7 +76,8 @@ public class Entity
         throw new Exception($"Entity {Id} does not have component of type {typeof(T)}");
     }
 
-    public T[] GetComponents<T>() where T : IComponent
+    public T[] GetComponents<T>()
+        where T : IComponent
     {
         if (_components.ContainsKey(typeof(T)))
         {

@@ -5,7 +5,11 @@ namespace Engine.Utils;
 
 public static class DictionaryExtensions
 {
-    public static TValue TryGetOrAdd<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key, Func<TValue> adder)
+    public static TValue TryGetOrAdd<TKey, TValue>(
+        this Dictionary<TKey, TValue> dictionary,
+        TKey key,
+        Func<TValue> adder
+    )
     {
         if (dictionary.ContainsKey(key))
         {

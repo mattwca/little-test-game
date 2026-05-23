@@ -21,7 +21,10 @@ public class VisibilitySystem(EntityManager entityManager, GraphicsDevice graphi
         var cameraEntity = _entityManager.GetEntityWithComponent<CameraComponent>()!;
         var cameraComponent = cameraEntity.GetComponent<CameraComponent>();
 
-        var entitiesToCheck = _entityManager.GetEntitiesWithComponents(typeof(PositionComponent), typeof(VisibilityComponent));
+        var entitiesToCheck = _entityManager.GetEntitiesWithComponents(
+            typeof(PositionComponent),
+            typeof(VisibilityComponent)
+        );
 
         var topLeft = Vector2.Zero;
         var bottomRight = new Vector2(_graphicsDevice.Viewport.Width, _graphicsDevice.Viewport.Height);
@@ -56,11 +59,8 @@ public class VisibilitySystem(EntityManager entityManager, GraphicsDevice graphi
 
             var offset = entityVisibility.Offset;
             var entityOffsetBoundingBox = new Rectangle(
-                new Point(
-                    (int)entityPosition.Position.X,
-                    (int)entityPosition.Position.Y),
-                    new Point((int)offset, (int)offset
-                )
+                new Point((int)entityPosition.Position.X, (int)entityPosition.Position.Y),
+                new Point((int)offset, (int)offset)
             );
 
             entityVisibility.IsVisible = cameraWorldBoundingBox.Intersects(entityOffsetBoundingBox);

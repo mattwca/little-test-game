@@ -4,7 +4,8 @@ namespace Engine.Utils;
 
 public class LinearColourGenerator(Color[] colours, float speed = 0.5f)
 {
-    public static Color[] DefaultColours = [
+    public static Color[] DefaultColours =
+    [
         Color.Red,
         Color.Orange,
         Color.Yellow,

@@ -20,12 +20,14 @@ public class LightSystem : IRenderSystem, IUpdateSystem, IRenderSystemOrder
     private readonly SpriteBatch _spriteBatch;
     private readonly SpriteRenderer _spriteRenderer;
 
-
     private readonly RenderTarget2D _occluderTexture;
     private readonly Effect _shadowMapEffect;
 
     public Dictionary<string, RenderTarget2D> ShadowMaps { get; }
-    public int RenderOrder { get => 0; }
+    public int RenderOrder
+    {
+        get => 0;
+    }
 
     public LightSystem(
         EntityManager entityManager,
@@ -54,7 +56,11 @@ public class LightSystem : IRenderSystem, IUpdateSystem, IRenderSystemOrder
 
     public Entity[] GetVisibleLights()
     {
-        var lights = _entityManager.GetEntitiesWithComponents(typeof(LightComponent), typeof(PositionComponent), typeof(VisibilityComponent));
+        var lights = _entityManager.GetEntitiesWithComponents(
+            typeof(LightComponent),
+            typeof(PositionComponent),
+            typeof(VisibilityComponent)
+        );
         return lights.Where((light) => light.GetComponent<VisibilityComponent>().IsVisible).ToArray();
     }
 
@@ -86,14 +92,19 @@ public class LightSystem : IRenderSystem, IUpdateSystem, IRenderSystemOrder
 
     private void RenderOccluders()
     {
-        _graphicsDevice.WithRenderTarget(_occluderTexture, () =>
-        {
-            _graphicsDevice.Clear(Color.Transparent);
-            _spriteRenderer.RenderSprites((renderComponent) =>
+        _graphicsDevice.WithRenderTarget(
+            _occluderTexture,
+            () =>
             {
-                return renderComponent.CastsShadow;
-            });
-        });
+                _graphicsDevice.Clear(Color.Transparent);
+                _spriteRenderer.RenderSprites(
+                    (renderComponent) =>
+                    {
+                        return renderComponent.CastsShadow;
+                    }
+                );
+            }
+        );
     }
 
     private void RenderShadowMap(string entityId, PositionComponent lightPosition, LightComponent lightComponent)
@@ -101,8 +112,12 @@ public class LightSystem : IRenderSystem, IUpdateSystem, IRenderSystemOrder
         var cameraEntity = _entityManager.GetEntitiesWithComponent<CameraComponent>().FirstOrDefault();
         var cameraComponent = cameraEntity?.GetComponent<CameraComponent>();
 
-        _shadowMapEffect.Parameters["LightPosition"].SetValue(Vector2.Transform(lightPosition.Centre, cameraComponent!.Transform));
-        _shadowMapEffect.Parameters["Resolution"].SetValue(new Vector2(_graphicsDevice.Viewport.Width, _graphicsDevice.Viewport.Height));
+        _shadowMapEffect
+            .Parameters["LightPosition"]
+            .SetValue(Vector2.Transform(lightPosition.Centre, cameraComponent!.Transform));
+        _shadowMapEffect
+            .Parameters["Resolution"]
+            .SetValue(new Vector2(_graphicsDevice.Viewport.Width, _graphicsDevice.Viewport.Height));
         _shadowMapEffect.Parameters["LightRadius"].SetValue(lightComponent.Radius / _graphicsDevice.Viewport.Height);
 
         if (!ShadowMaps.ContainsKey(entityId))
@@ -114,7 +129,11 @@ public class LightSystem : IRenderSystem, IUpdateSystem, IRenderSystemOrder
         _graphicsDevice.Clear(Color.Transparent);
 
         _spriteBatch.Begin(SpriteSortMode.Immediate, effect: _shadowMapEffect);
-        _spriteBatch.Draw(_occluderTexture, new Rectangle(0, 0, _graphicsDevice.Viewport.Width, _graphicsDevice.Viewport.Height), Color.White);
+        _spriteBatch.Draw(
+            _occluderTexture,
+            new Rectangle(0, 0, _graphicsDevice.Viewport.Width, _graphicsDevice.Viewport.Height),
+            Color.White
+        );
         _spriteBatch.End();
 
         _graphicsDevice.SetRenderTarget(null);

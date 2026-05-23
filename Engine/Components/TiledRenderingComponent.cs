@@ -20,7 +20,7 @@ public class TiledRenderingComponent : RenderingComponent
         float scale = 1f,
         bool castsShadow = false
     )
-      : base(texture, colour, offset, layer, scale, castsShadow)
+        : base(texture, colour, offset, layer, scale, castsShadow)
     {
         TileSize = tileSize;
         TilesX = tilesX;

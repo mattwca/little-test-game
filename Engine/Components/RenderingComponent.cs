@@ -26,7 +26,8 @@ public class RenderingComponent : IComponent
         bool flipX = false,
         bool flipY = false,
         bool castsShadow = true,
-        Rectangle? sourceRectangle = null)
+        Rectangle? sourceRectangle = null
+    )
     {
         Texture = texture;
         Colour = colour;

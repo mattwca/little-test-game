@@ -27,7 +27,8 @@ public class QuadTreeBranchNode : QuadTreeNode
     public QuadTreeNode BottomRight { get; set; }
     public QuadTreeNode BottomLeft { get; set; }
 
-    public QuadTreeBranchNode(float x, float y, float width, float height, int depth) : base(x, y, width, height, depth)
+    public QuadTreeBranchNode(float x, float y, float width, float height, int depth)
+        : base(x, y, width, height, depth)
     {
         var childWidth = width / 2f;
         var childHeight = height / 2f;
@@ -43,7 +44,8 @@ public class QuadTreeLeafNode : QuadTreeNode
 {
     public List<RectangleF> BoundingBoxes { get; }
 
-    public QuadTreeLeafNode(float x, float y, float width, float height, int depth) : base(x, y, width, height, depth)
+    public QuadTreeLeafNode(float x, float y, float width, float height, int depth)
+        : base(x, y, width, height, depth)
     {
         BoundingBoxes = [];
     }
@@ -77,7 +79,13 @@ public class QuadTree
                 return node;
             }
 
-            var newBranch = new QuadTreeBranchNode(node.NodeBox.X, node.NodeBox.Y, node.NodeBox.Width, node.NodeBox.Height, node.Depth);
+            var newBranch = new QuadTreeBranchNode(
+                node.NodeBox.X,
+                node.NodeBox.Y,
+                node.NodeBox.Width,
+                node.NodeBox.Height,
+                node.Depth
+            );
 
             foreach (var bb in leafNode.BoundingBoxes)
             {
@@ -91,12 +99,18 @@ public class QuadTree
                     topRightLeaf.BoundingBoxes.Add(bb);
                 }
 
-                if (newBranch.BottomRight.NodeBox.Intersects(bb) && newBranch.BottomRight is QuadTreeLeafNode bottomRightLeaf)
+                if (
+                    newBranch.BottomRight.NodeBox.Intersects(bb)
+                    && newBranch.BottomRight is QuadTreeLeafNode bottomRightLeaf
+                )
                 {
                     bottomRightLeaf.BoundingBoxes.Add(bb);
                 }
 
-                if (newBranch.BottomLeft.NodeBox.Intersects(bb) && newBranch.BottomLeft is QuadTreeLeafNode bottomLeftLeaf)
+                if (
+                    newBranch.BottomLeft.NodeBox.Intersects(bb)
+                    && newBranch.BottomLeft is QuadTreeLeafNode bottomLeftLeaf
+                )
                 {
                     bottomLeftLeaf.BoundingBoxes.Add(bb);
                 }
@@ -111,22 +125,28 @@ public class QuadTree
     public void AddIntersector(RectangleF boundingBox)
     {
         // find the leaf node(s) that contain this bounding box and add it to them.
-        WalkTree(_rootNode, (leaf) =>
-        {
-            if (leaf.NodeBox.Intersects(boundingBox))
+        WalkTree(
+            _rootNode,
+            (leaf) =>
             {
-                leaf.BoundingBoxes.Add(boundingBox);
+                if (leaf.NodeBox.Intersects(boundingBox))
+                {
+                    leaf.BoundingBoxes.Add(boundingBox);
+                }
             }
-        });
+        );
 
         // go through and check whether we need to split a leaf into a branch
-        WalkTree(_rootNode, branchCallback: (branch) =>
-        {
-            branch.TopLeft = UpdateNodeIfRequired(branch.TopLeft);
-            branch.TopRight = UpdateNodeIfRequired(branch.TopRight);
-            branch.BottomRight = UpdateNodeIfRequired(branch.BottomRight);
-            branch.BottomLeft = UpdateNodeIfRequired(branch.BottomLeft);
-        });
+        WalkTree(
+            _rootNode,
+            branchCallback: (branch) =>
+            {
+                branch.TopLeft = UpdateNodeIfRequired(branch.TopLeft);
+                branch.TopRight = UpdateNodeIfRequired(branch.TopRight);
+                branch.BottomRight = UpdateNodeIfRequired(branch.BottomRight);
+                branch.BottomLeft = UpdateNodeIfRequired(branch.BottomLeft);
+            }
+        );
     }
 
     public List<RectangleF> GetIntersectors(RectangleF boundingBox)
@@ -175,7 +195,11 @@ public class QuadTree
      * Recursively walks the tree and visits every node, starting from the given node.
      * Invokes a specific callback depending on the type of node encountered, either a leaf or a branch.
      */
-    private void WalkTree(QuadTreeNode node, Action<QuadTreeLeafNode>? leafCallback = null, Action<QuadTreeBranchNode>? branchCallback = null)
+    private void WalkTree(
+        QuadTreeNode node,
+        Action<QuadTreeLeafNode>? leafCallback = null,
+        Action<QuadTreeBranchNode>? branchCallback = null
+    )
     {
         if (node is QuadTreeLeafNode leafNode)
         {
