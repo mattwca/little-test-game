@@ -1,4 +1,5 @@
 using System;
+using Engine.Physics;
 
 namespace Engine.Tiling;
 
@@ -12,7 +13,13 @@ public enum TileNeighbours
     Right = 1 << 3,
 }
 
-public record TileDefinition(int X, int Y, TileNeighbours Neighbours, bool CastsShadow = true);
+public record TileDefinition(
+    int X,
+    int Y,
+    TileNeighbours Neighbours,
+    bool CastsShadow = true,
+    RectangleF? boundingBox = null
+);
 
 public class TileMapDefinition(string tileType, string tileTexturePath, int tileSize, TileDefinition[] tileDefinitions)
 {

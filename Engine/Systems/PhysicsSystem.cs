@@ -1,13 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using System.Threading.Tasks;
 using Engine.Components;
 using Engine.ECS;
 using Engine.Physics;
 using Engine.Rendering;
 using Engine.Utils;
-
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -19,9 +18,10 @@ public class PhysicsSystem : IUpdateSystem, IRenderSystem
     private readonly StateManager _stateManager;
     private readonly EntityManager _entityManager;
     private readonly ShapeRenderer _shapeRenderer;
-
-    private readonly QuadTree _quadTree;
     private readonly List<RectangleF> _intersectResults;
+
+    private bool _isUpdatingQuadTree;
+    private volatile QuadTree _quadTree;
 
     public PhysicsSystem(
         SpriteBatch spriteBatch,
@@ -97,6 +97,8 @@ public class PhysicsSystem : IUpdateSystem, IRenderSystem
 
     public void Update(GameTime gameTime)
     {
+        BuildQuadTree();
+
         var dynamicBoundingEntities = _entityManager.Entities.Where(entity =>
             entity.HasComponent<PositionComponent>()
             && entity.HasComponent<BoundingBoxComponent>()
@@ -131,32 +133,6 @@ public class PhysicsSystem : IUpdateSystem, IRenderSystem
                     positionComponent.Position += new Vector2(0, Math.Sign(intersectionDirection.Y) * overlapY);
                 }
 
-                // var intersectionResult = RectangleF.Intersect(boundingRect, intersector);
-                // _intersectResults.Add(intersectionResult);
-
-                // if (intersectionResult.Width < intersectionResult.Height)
-                // {
-                //     if (intersectionResult.X < positionComponent.Position.X)
-                //     {
-                //         positionComponent.Position += new Vector2(intersectionResult.Width, 0);
-                //     }
-                //     else
-                //     {
-                //         positionComponent.Position -= new Vector2(intersectionResult.Width, 0);
-                //     }
-                // }
-                // else
-                // {
-                //     if (intersectionResult.Y > boundingRect.Y)
-                //     {
-                //         positionComponent.Position -= new Vector2(0, intersectionResult.Height);
-                //     }
-                //     else
-                //     {
-                //         positionComponent.Position += new Vector2(0, intersectionResult.Height);
-                //     }
-                // }
-
                 boundingRect = GetBoundingRectangleForComponents(positionComponent, boundingBoxComponent);
             }
         }
@@ -171,25 +147,46 @@ public class PhysicsSystem : IUpdateSystem, IRenderSystem
         return new RectangleF(position.X, position.Y, boundingBoxComponent.Width, boundingBoxComponent.Height);
     }
 
-    private void BuildQuadTree()
+    private async void BuildQuadTree()
     {
-        var boundingBoxEntities = _entityManager.GetEntitiesWithComponents(
-            typeof(BoundingBoxComponent),
-            typeof(PositionComponent)
-        );
-
-        foreach (var entity in boundingBoxEntities)
+        if (_isUpdatingQuadTree)
         {
-            var positionComponent = entity.GetComponent<PositionComponent>();
-            var boundingBoxComponents = entity.GetComponentsWith<BoundingBoxComponent>((bb) => bb.IsStatic);
-
-            foreach (var bbComponent in boundingBoxComponents)
-            {
-                var worldPosition = positionComponent.Position + bbComponent.Offset;
-                var bbRect = new RectangleF(worldPosition.X, worldPosition.Y, bbComponent.Width, bbComponent.Height);
-
-                _quadTree.AddIntersector(bbRect);
-            }
+            return;
         }
+
+        _isUpdatingQuadTree = true;
+
+        var quadTree = await Task.Run(() =>
+        {
+            var boundingBoxEntities = _entityManager.GetEntitiesWithComponents(
+                typeof(BoundingBoxComponent),
+                typeof(PositionComponent)
+            );
+
+            var newQuadTree = new QuadTree(800, 600);
+
+            foreach (var entity in boundingBoxEntities)
+            {
+                var positionComponent = entity.GetComponent<PositionComponent>();
+                var boundingBoxComponents = entity.GetComponentsWith<BoundingBoxComponent>((bb) => bb.IsStatic);
+
+                foreach (var bbComponent in boundingBoxComponents)
+                {
+                    var worldPosition = positionComponent.Position + bbComponent.Offset;
+                    var bbRect = new RectangleF(
+                        worldPosition.X,
+                        worldPosition.Y,
+                        bbComponent.Width,
+                        bbComponent.Height
+                    );
+
+                    newQuadTree.AddIntersector(bbRect);
+                }
+            }
+            return newQuadTree;
+        });
+
+        _isUpdatingQuadTree = false;
+        _quadTree = quadTree;
     }
 }

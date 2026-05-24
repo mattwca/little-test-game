@@ -31,6 +31,15 @@ public class Entity
         return this;
     }
 
+    public Entity AddComponents<T>(List<T> components)
+        where T : IComponent
+    {
+        var componentType = typeof(T);
+        _components[componentType] = components.Cast<IComponent>().ToList();
+
+        return this;
+    }
+
     public bool HasComponent<T>()
         where T : IComponent => _components.ContainsKey(typeof(T));
 
@@ -52,6 +61,18 @@ public class Entity
         {
             _components.Remove(componentType);
         }
+    }
+
+    public void RemoveComponents<T>()
+        where T : IComponent
+    {
+        if (!HasComponent<T>())
+        {
+            return;
+        }
+
+        var componentType = typeof(T);
+        _components[componentType] = [];
     }
 
     public T GetComponent<T>()

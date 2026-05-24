@@ -6,7 +6,6 @@ using Engine.Rendering;
 using Engine.Systems;
 using Engine.Tiling;
 using Engine.Utils;
-
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -181,10 +180,11 @@ public class LittleTestGame : Game
             .AddComponent(
                 new MapComponent(
                     WallTileDefinitions.Definition,
-                    [
-                        [0, 0],
-                        [0, 0],
-                    ],
+                    new int[,]
+                    {
+                        { 0, 0 },
+                        { 0, 0 },
+                    },
                     1
                 )
             )
@@ -201,6 +201,7 @@ public class LittleTestGame : Game
 
         _systemManager.AddSystem<VisibilitySystem>();
         _systemManager.AddSystem<PlayerSystem>();
+        _systemManager.AddSystem<MapSystem>();
         _systemManager.AddSystem<PhysicsSystem>();
 
         _systemManager.AddSystem<AnimationSystem>();

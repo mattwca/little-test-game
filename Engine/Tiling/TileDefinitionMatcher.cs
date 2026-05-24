@@ -5,9 +5,9 @@ namespace Engine.Tiling;
 public class TileDefinitionMatcher : ITileDefinitionMatcher
 {
     private readonly TileMapDefinition _mapDefinition;
-    private readonly int[][] _mapData;
+    private readonly int[,] _mapData;
 
-    public TileDefinitionMatcher(TileMapDefinition mapDefinition, int[][] mapData)
+    public TileDefinitionMatcher(TileMapDefinition mapDefinition, int[,] mapData)
     {
         _mapDefinition = mapDefinition;
         _mapData = mapData;
@@ -31,11 +31,11 @@ public class TileDefinitionMatcher : ITileDefinitionMatcher
 
     private bool IsTileOccupied(int tileX, int tileY)
     {
-        if (tileX < 0 || tileY < 0 || tileX > _mapData.Length - 1 || tileY > _mapData[0].Length - 1)
+        if (tileX < 0 || tileY < 0 || tileX > _mapData.GetLength(0) - 1 || tileY > _mapData.GetLength(1) - 1)
         {
             return false;
         }
 
-        return _mapData[tileX][tileY] >= 0;
+        return _mapData[tileX, tileY] >= 0;
     }
 }
