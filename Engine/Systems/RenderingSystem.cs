@@ -3,7 +3,6 @@ using Engine.ECS;
 using Engine.Lighting;
 using Engine.Rendering;
 using Engine.Utils;
-
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -24,7 +23,6 @@ public class RenderingSystem : IRenderSystem, IRenderSystemOrder
 
     private readonly SpriteRenderer _spriteRenderer;
     private readonly TileRenderer _tileRenderer;
-    private readonly AutoTileRenderer _autoTileRenderer;
 
     private readonly RenderTarget2D _sceneBuffer;
     private readonly RenderTarget2D _lightingBuffer;
@@ -48,8 +46,7 @@ public class RenderingSystem : IRenderSystem, IRenderSystemOrder
         SpriteBatch spriteBatch,
         Helper helper,
         SpriteRenderer spriteRenderer,
-        TileRenderer tileRenderer,
-        AutoTileRenderer autoTileRenderer
+        TileRenderer tileRenderer
     )
     {
         _graphicsDevice = graphicsDevice;
@@ -62,7 +59,6 @@ public class RenderingSystem : IRenderSystem, IRenderSystemOrder
 
         _spriteRenderer = spriteRenderer;
         _tileRenderer = tileRenderer;
-        _autoTileRenderer = autoTileRenderer;
 
         _lightingEffect = _contentManager.Load<Effect>("Effects/LightingEffect");
 
@@ -129,7 +125,6 @@ public class RenderingSystem : IRenderSystem, IRenderSystemOrder
             {
                 _graphicsDevice.Clear(Color.Transparent);
                 _tileRenderer.RenderTiles();
-                _autoTileRenderer.RenderMaps();
                 _spriteRenderer.RenderSprites();
             }
         );

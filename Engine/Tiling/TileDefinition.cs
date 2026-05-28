@@ -21,10 +21,9 @@ public record TileDefinition(
     RectangleF? boundingBox = null
 );
 
-public class TileMapDefinition(string tileType, string tileTexturePath, int tileSize, TileDefinition[] tileDefinitions)
+public class TileMapDefinition(string tileId, int tileSize, TileDefinition[] tileDefinitions)
 {
     public int TileSize { get; } = tileSize;
-    public string TileType { get; } = tileType;
-    public string TileTexturePath { get; } = tileTexturePath;
+    public string TileId { get; } = tileId;
     public TileDefinition[] TileDefinitions { get; } = tileDefinitions;
 }

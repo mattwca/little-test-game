@@ -5,38 +5,58 @@ using System.Linq;
 using Engine.Components;
 using Engine.ECS;
 using Engine.Tiling;
+using Engine.Utils;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace Engine.Systems;
 
 public class MapSystem : IUpdateSystem
 {
     private readonly EntityManager _entityManager;
-    private readonly Dictionary<string, int> _tileHashes;
+    private readonly ContentManager _contentManager;
 
-    public MapSystem(EntityManager entityManager)
+    private readonly Dictionary<string, int> _tileHashes;
+    private readonly Dictionary<string, Dictionary<(int x, int y), string>> _mapTileEntities;
+
+    private const string TILE_ENTITY_ID = "map:{0}:{1}x{2}";
+
+    public MapSystem(EntityManager entityManager, ContentManager contentManager)
     {
         _entityManager = entityManager;
+        _contentManager = contentManager;
+
         _tileHashes = [];
+        _mapTileEntities = [];
     }
 
     public void Update(GameTime gameTime)
     {
         var mapEntities = _entityManager.GetEntitiesWithComponent<MapComponent>();
 
-        foreach (var entity in mapEntities)
+        foreach (var mapEntity in mapEntities)
         {
-            var mapComponent = entity.GetComponent<MapComponent>();
-            if (!GetHashChanged(entity.Id, mapComponent.MapData))
+            if (_mapTileEntities.ContainsKey(mapEntity.Id))
             {
+                UpdateTileEntitiesForMap(mapEntity);
                 return;
             }
 
-            // Rebuild the tile index map and bounding boxes if tile layout has changed.
-            BuildTileIndexMap(mapComponent);
-            BuildBoundingBoxes(entity, mapComponent);
+            _mapTileEntities.Add(mapEntity.Id, []);
+            BuildTileEntitiesForMap(mapEntity);
         }
     }
+
+    // private void CheckChangesAndUpdate(Entity mapEntity)
+    // {
+    //     var mapComponent = mapEntity.GetComponent<MapComponent>();
+
+    //     if (!GetHashChanged(mapEntity.Id, mapComponent.MapData))
+    //     {
+    //         return;
+    //     }
+    // }
 
     private bool GetHashChanged(string entityId, int[,] mapData)
     {
@@ -51,76 +71,88 @@ public class MapSystem : IUpdateSystem
         return true;
     }
 
-    /// <summary>
-    /// Rebuilds the "tile definition index" map used to determine which tile definition is
-    /// used for each square in the map, and therefore the final tile sprite that is rendered.
-    /// </summary>
-    private void BuildTileIndexMap(MapComponent mapComponent)
+    private void BuildTileEntitiesForMap(Entity mapEntity)
     {
-        var newIndexMap = new int[mapComponent.MapData.GetLength(0), mapComponent.MapData.GetLength(1)];
-        var tileMatcher = new TileDefinitionMatcher(mapComponent.MapDefinition, mapComponent.MapData);
+        var mapComponent = mapEntity.GetComponent<MapComponent>();
+        var mapPositionComponent = mapEntity.GetComponent<PositionComponent>();
 
-        for (var i = 0; i < mapComponent.MapData.GetLength(0); i++)
+        var width = mapComponent.MapData.GetLength(1);
+        var height = mapComponent.MapData.GetLength(0);
+        var tileSize = mapComponent.MapDefinition.TileSize;
+
+        for (var x = 0; x < width; x++)
         {
-            for (var j = 0; j < mapComponent.MapData.GetLength(1); j++)
+            for (var y = 0; y < height; y++)
             {
-                // Get the tile definition to use for the current tile
-                var tileDefinition = tileMatcher.FindMatchForTile(i, j);
-                var tileDefinitionIndex = mapComponent.MapDefinition.TileDefinitions.ToList().IndexOf(tileDefinition);
+                var tilePosition = mapPositionComponent.Position + new Vector2(x * tileSize, y * tileSize);
 
-                if (tileDefinitionIndex == -1)
-                {
-                    continue;
-                }
-
-                // Store the index of the definition into our map.
-                newIndexMap[i, j] = tileDefinitionIndex;
+                _entityManager
+                    .CreateEntity(string.Format(TILE_ENTITY_ID, mapEntity.Id, x, y))
+                    .AddComponent(new PositionComponent(tilePosition, tileSize, tileSize))
+                    .AddComponent(new VisibilityComponent());
             }
         }
 
-        mapComponent.TileIndexMap = newIndexMap;
+        UpdateTileEntitiesForMap(mapEntity);
     }
 
-    private void BuildBoundingBoxes(Entity mapEntity, MapComponent mapComponent)
+    private void UpdateTileEntitiesForMap(Entity mapEntity)
     {
-        mapEntity.RemoveComponents<BoundingBoxComponent>();
+        var mapComponent = mapEntity.GetComponent<MapComponent>();
 
-        List<BoundingBoxComponent> boundingBoxComponents = [];
+        int width = mapComponent.MapData.GetLength(1),
+            height = mapComponent.MapData.GetLength(0),
+            tileSize = mapComponent.MapDefinition.TileSize;
 
-        for (var i = 0; i < mapComponent.MapData.GetLength(0); i++)
+        var mapTexture = _contentManager.Load<Texture2D>(mapComponent.MapDefinition.TileId);
+        var tileMatcher = new TileDefinitionMatcher(mapComponent.MapDefinition, mapComponent.MapData);
+
+        var definitions = new string[height, width];
+
+        for (var y = 0; y < height; y++)
         {
-            for (var j = 0; j < mapComponent.MapData.GetLength(1); j++)
+            for (var x = 0; x < width; x++)
             {
-                var tileDefinitionIndex = mapComponent.TileIndexMap[i, j];
-                var tileDefinition = mapComponent.MapDefinition.TileDefinitions[tileDefinitionIndex];
+                var tileEntityId = string.Format(TILE_ENTITY_ID, mapEntity.Id, x, y);
+                var tileEntity = _entityManager.GetEntity(tileEntityId)!;
+                var tileDefinition = tileMatcher.FindMatchForTile(x, y);
 
-                if (tileDefinition.boundingBox == null)
+                definitions[y, x] = tileDefinition?.Neighbours.ToString() ?? "";
+
+                if (tileDefinition == null)
+                {
+                    tileEntity.RemoveComponents<RenderingComponent>();
+                    continue;
+                }
+
+                var updatedRenderingComponent = new RenderingComponent(
+                    mapTexture,
+                    castsShadow: tileDefinition.CastsShadow,
+                    sourceRectangle: new Rectangle(
+                        tileDefinition.X * tileSize,
+                        tileDefinition.Y * tileSize,
+                        tileSize,
+                        tileSize
+                    ),
+                    colour: Color.White
+                );
+
+                tileEntity.ReplaceComponent(updatedRenderingComponent);
+
+                if (!tileDefinition.boundingBox.HasValue)
                 {
                     continue;
                 }
 
-                var tilePosition = new Vector2(
-                    i * mapComponent.MapDefinition.TileSize,
-                    j * mapComponent.MapDefinition.TileSize
+                var bb = tileDefinition.boundingBox.Value;
+                var updatedBoundingBoxComponent = new BoundingBoxComponent(
+                    new Vector2(bb.X, bb.Y),
+                    bb.Width,
+                    bb.Height
                 );
 
-                var boundingBoxPosition =
-                    tilePosition + new Vector2(tileDefinition.boundingBox.Value.X, tileDefinition.boundingBox.Value.Y);
-
-                var newBonudingBoxComponent = new BoundingBoxComponent(
-                    boundingBoxPosition,
-                    tileDefinition.boundingBox.Value.Width,
-                    tileDefinition.boundingBox.Value.Height
-                );
-
-                Console.WriteLine(
-                    $"{newBonudingBoxComponent.Offset}, {newBonudingBoxComponent.Width} x {newBonudingBoxComponent.Height}"
-                );
-
-                boundingBoxComponents.Add(newBonudingBoxComponent);
+                tileEntity.ReplaceComponent(updatedBoundingBoxComponent);
             }
         }
-
-        mapEntity.AddComponents(boundingBoxComponents);
     }
 }

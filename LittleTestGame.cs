@@ -108,72 +108,6 @@ public class LittleTestGame : Game
             .AddComponent(new VisibilityComponent())
             .AddComponent(new AnimationComponent("playerWalking", 30))
             .AddComponent(new BoundingBoxComponent(new Vector2(0, 16), 32, 16, false));
-        // .AddComponent(new LightComponent(Color.LightBlue));
-
-        // _systemManager.EntityManager
-        //     .CreateEntity("wall")
-        //     .AddComponent(new PositionComponent(new Vector2(300, 250), 32, 32))
-        //     .AddComponent(new RenderingComponent(Content.Load<Texture2D>("wall"), Color.White, layer: 1))
-        //     .AddComponent(new RenderingComponent(Content.Load<Texture2D>("wall"), Color.White, offset: new Vector2(32, 0)))
-        //     .AddComponent(new RenderingComponent(Content.Load<Texture2D>("wall"), Color.White, offset: new Vector2(0, -32)))
-        //     .AddComponent(new RenderingComponent(Content.Load<Texture2D>("wall"), Color.White, offset: new Vector2(0, 32)))
-        //     .AddComponent(new VisibilityComponent())
-        //     .AddComponent(new BoundingBoxComponent(Vector2.Zero, 32, 32))
-        //     .AddComponent(new BoundingBoxComponent(new Vector2(32, 0), 32, 32))
-        //     .AddComponent(new BoundingBoxComponent(new Vector2(0, -32), 32, 32))
-        //     .AddComponent(new BoundingBoxComponent(new Vector2(0, 32), 32, 32));
-
-        // _systemManager.EntityManager
-        //     .CreateEntity("wall2")
-        //     .AddComponent(new PositionComponent(new Vector2(50, 100), 32, 32))
-        //     .AddComponent(new RenderingComponent(Content.Load<Texture2D>("wall"), Color.White, layer: 1))
-        //     .AddComponent(new RenderingComponent(Content.Load<Texture2D>("wall"), Color.White, offset: new Vector2(32, 0)))
-        //     .AddComponent(new RenderingComponent(Content.Load<Texture2D>("wall"), Color.White, offset: new Vector2(0, -32)))
-        //     .AddComponent(new RenderingComponent(Content.Load<Texture2D>("wall"), Color.White, offset: new Vector2(0, -64)))
-        //     .AddComponent(new VisibilityComponent())
-        //     .AddComponent(new BoundingBoxComponent(Vector2.Zero, 32, 32))
-        //     .AddComponent(new BoundingBoxComponent(new Vector2(32, 0), 32, 32))
-        //     .AddComponent(new BoundingBoxComponent(new Vector2(0, -32), 32, 32))
-        //     .AddComponent(new BoundingBoxComponent(new Vector2(0, -64), 32, 32));
-
-        // _systemManager.EntityManager
-        //     .CreateEntity("wall3")
-        //     .AddComponent(new PositionComponent(new Vector2(200, 100), 32, 32))
-        //     .AddComponent(new RenderingComponent(Content.Load<Texture2D>("wall"), Color.White, layer: 1))
-        //     .AddComponent(new RenderingComponent(Content.Load<Texture2D>("wall"), Color.White, offset: new Vector2(32, 0)))
-        //     .AddComponent(new RenderingComponent(Content.Load<Texture2D>("wall"), Color.White, offset: new Vector2(64, 0)))
-        //     .AddComponent(new RenderingComponent(Content.Load<Texture2D>("wall"), Color.White, offset: new Vector2(96, 0)))
-        //     .AddComponent(new VisibilityComponent())
-        //     .AddComponent(new BoundingBoxComponent(Vector2.Zero, 32, 32))
-        //     .AddComponent(new BoundingBoxComponent(new Vector2(32, 0), 32, 32))
-        //     .AddComponent(new BoundingBoxComponent(new Vector2(64, 0), 32, 32))
-        //     .AddComponent(new BoundingBoxComponent(new Vector2(96, 0), 32, 32));
-
-        // _systemManager.EntityManager
-        //     .CreateEntity("wall4")
-        //     .AddComponent(new PositionComponent(new Vector2(350, 150), 32, 32))
-        //     .AddComponent(new RenderingComponent(Content.Load<Texture2D>("wall"), Color.White, layer: 1))
-        //     .AddComponent(new RenderingComponent(Content.Load<Texture2D>("wall"), Color.White, offset: new Vector2(32, 0)))
-        //     .AddComponent(new RenderingComponent(Content.Load<Texture2D>("wall"), Color.White, offset: new Vector2(64, 0)))
-        //     .AddComponent(new RenderingComponent(Content.Load<Texture2D>("wall"), Color.White, offset: new Vector2(64, 32)))
-        //     .AddComponent(new VisibilityComponent())
-        //     .AddComponent(new BoundingBoxComponent(Vector2.Zero, 32, 32))
-        //     .AddComponent(new BoundingBoxComponent(new Vector2(32, 0), 32, 32))
-        //     .AddComponent(new BoundingBoxComponent(new Vector2(64, 0), 32, 32))
-        //     .AddComponent(new BoundingBoxComponent(new Vector2(64, 32), 32, 32));
-
-        // _systemManager.EntityManager
-        //     .CreateEntity("wall5")
-        //     .AddComponent(new PositionComponent(new Vector2(50, 200), 32, 32))
-        //     .AddComponent(new RenderingComponent(Content.Load<Texture2D>("wall"), Color.White, layer: 1))
-        //     .AddComponent(new RenderingComponent(Content.Load<Texture2D>("wall"), Color.White, offset: new Vector2(0, 32)))
-        //     .AddComponent(new RenderingComponent(Content.Load<Texture2D>("wall"), Color.White, offset: new Vector2(32, 32)))
-        //     .AddComponent(new RenderingComponent(Content.Load<Texture2D>("wall"), Color.White, offset: new Vector2(64, 32)))
-        //     .AddComponent(new VisibilityComponent())
-        //     .AddComponent(new BoundingBoxComponent(Vector2.Zero, 32, 32))
-        //     .AddComponent(new BoundingBoxComponent(new Vector2(0, 32), 32, 32))
-        //     .AddComponent(new BoundingBoxComponent(new Vector2(32, 32), 32, 32))
-        //     .AddComponent(new BoundingBoxComponent(new Vector2(64, 32), 32, 32));
 
         _systemManager
             .EntityManager.CreateEntity("mapBase")
@@ -182,22 +116,17 @@ public class LittleTestGame : Game
                     WallTileDefinitions.Definition,
                     new int[,]
                     {
-                        { 0, 0 },
-                        { 0, 0 },
+                        { 1, 1, 0, 0, 0, 1, 1, 1, 1, 1 },
+                        { 1, 1, 0, 0, 0, 1, 1, 1, 1, 1 },
+                        { 1, 1, 1, 1, 0, 0, 0, 0, 1, 1 },
+                        { 1, 1, 1, 1, 0, 0, 0, 0, 1, 1 },
+                        { 0, 0, 0, 0, 0, 0, 0, 1, 1, 1 },
+                        { 0, 0, 0, 0, 0, 0, 0, 1, 1, 1 },
                     },
                     1
                 )
             )
-            .AddComponent(new PositionComponent(new Vector2(0, 0)));
-
-        // var map = new Map("base", new Vector2(0, 0), [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]], WallTileDefinitions.Definition);
-
-        // var mapBuilder = _systemManager.Construct<MapBuilder>();
-        // _systemManager.Register(mapBuilder);
-
-        // var entity = mapBuilder.BuildTileComponents(map);
-        // entity.AddComponent(new PositionComponent(new Vector2(0f, 0f)));
-        // _systemManager.EntityManager.AddEntity(entity);
+            .AddComponent(new PositionComponent(new Vector2(20, 50)));
 
         _systemManager.AddSystem<VisibilitySystem>();
         _systemManager.AddSystem<PlayerSystem>();
@@ -211,7 +140,6 @@ public class LittleTestGame : Game
         _systemManager.AddSystem<LightSystem>();
 
         _systemManager.Register(_systemManager.Construct<TileRenderer>());
-        _systemManager.Register(_systemManager.Construct<AutoTileRenderer>());
         _systemManager.AddSystem<RenderingSystem>();
         _systemManager.AddSystem<CameraSystem>();
     }

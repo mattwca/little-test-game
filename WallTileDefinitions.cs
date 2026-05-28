@@ -5,7 +5,6 @@ public static class WallTileDefinitions
 {
     public static TileMapDefinition Definition = new TileMapDefinition(
         "wall",
-        "wall",
         32,
         [
             new TileDefinition(

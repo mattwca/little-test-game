@@ -75,6 +75,18 @@ public class Entity
         _components[componentType] = [];
     }
 
+    public void ReplaceComponent<T>(T updatedComponent)
+        where T : IComponent
+    {
+        var componentType = typeof(T);
+        if (HasComponent<T>())
+        {
+            _components.Remove(componentType);
+        }
+
+        _components[componentType] = [updatedComponent];
+    }
+
     public T GetComponent<T>()
         where T : IComponent
     {

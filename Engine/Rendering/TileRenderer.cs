@@ -1,7 +1,6 @@
 using Engine.Components;
 using Engine.ECS;
 using Engine.Utils;
-
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 

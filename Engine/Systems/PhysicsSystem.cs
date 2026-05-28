@@ -147,7 +147,7 @@ public class PhysicsSystem : IUpdateSystem, IRenderSystem
         return new RectangleF(position.X, position.Y, boundingBoxComponent.Width, boundingBoxComponent.Height);
     }
 
-    private async void BuildQuadTree()
+    private void BuildQuadTree()
     {
         if (_isUpdatingQuadTree)
         {
@@ -156,37 +156,32 @@ public class PhysicsSystem : IUpdateSystem, IRenderSystem
 
         _isUpdatingQuadTree = true;
 
-        var quadTree = await Task.Run(() =>
+        // var quadTree = await Task.Run(() =>
+        // {
+        var boundingBoxEntities = _entityManager.GetEntitiesWithComponents(
+            typeof(BoundingBoxComponent),
+            typeof(PositionComponent)
+        );
+
+        var newQuadTree = new QuadTree(800, 600);
+
+        foreach (var entity in boundingBoxEntities)
         {
-            var boundingBoxEntities = _entityManager.GetEntitiesWithComponents(
-                typeof(BoundingBoxComponent),
-                typeof(PositionComponent)
-            );
+            var positionComponent = entity.GetComponent<PositionComponent>();
+            var boundingBoxComponents = entity.GetComponentsWith<BoundingBoxComponent>((bb) => bb.IsStatic);
 
-            var newQuadTree = new QuadTree(800, 600);
-
-            foreach (var entity in boundingBoxEntities)
+            foreach (var bbComponent in boundingBoxComponents)
             {
-                var positionComponent = entity.GetComponent<PositionComponent>();
-                var boundingBoxComponents = entity.GetComponentsWith<BoundingBoxComponent>((bb) => bb.IsStatic);
+                var worldPosition = positionComponent.Position + bbComponent.Offset;
+                var bbRect = new RectangleF(worldPosition.X, worldPosition.Y, bbComponent.Width, bbComponent.Height);
 
-                foreach (var bbComponent in boundingBoxComponents)
-                {
-                    var worldPosition = positionComponent.Position + bbComponent.Offset;
-                    var bbRect = new RectangleF(
-                        worldPosition.X,
-                        worldPosition.Y,
-                        bbComponent.Width,
-                        bbComponent.Height
-                    );
-
-                    newQuadTree.AddIntersector(bbRect);
-                }
+                newQuadTree.AddIntersector(bbRect);
             }
-            return newQuadTree;
-        });
+        }
+        // return newQuadTree;
+        // });
 
         _isUpdatingQuadTree = false;
-        _quadTree = quadTree;
+        _quadTree = newQuadTree;
     }
 }

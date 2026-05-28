@@ -1,10 +1,8 @@
 using System;
 using System.Linq;
-
 using Engine.Components;
 using Engine.ECS;
 using Engine.Utils;
-
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;

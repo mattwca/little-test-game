@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 
 namespace Engine.Tiling;
@@ -13,8 +14,13 @@ public class TileDefinitionMatcher : ITileDefinitionMatcher
         _mapData = mapData;
     }
 
-    public TileDefinition FindMatchForTile(int tileX, int tileY)
+    public TileDefinition? FindMatchForTile(int tileX, int tileY)
     {
+        if (!IsTileOccupied(tileX, tileY))
+        {
+            return null;
+        }
+
         var tileAbove = IsTileOccupied(tileX, tileY - 1);
         var tileBelow = IsTileOccupied(tileX, tileY + 1);
         var tileLeft = IsTileOccupied(tileX - 1, tileY);
@@ -26,16 +32,17 @@ public class TileDefinitionMatcher : ITileDefinitionMatcher
             | (tileLeft ? TileNeighbours.Left : 0)
             | (tileRight ? TileNeighbours.Right : 0);
 
-        return _mapDefinition.TileDefinitions.First((definition) => definition.Neighbours == mask);
+        return _mapDefinition.TileDefinitions.FirstOrDefault((definition) => definition.Neighbours == mask);
     }
 
     private bool IsTileOccupied(int tileX, int tileY)
     {
-        if (tileX < 0 || tileY < 0 || tileX > _mapData.GetLength(0) - 1 || tileY > _mapData.GetLength(1) - 1)
+        if (tileX < 0 || tileY < 0 || tileX > _mapData.GetLength(1) - 1 || tileY > _mapData.GetLength(0) - 1)
         {
             return false;
         }
 
-        return _mapData[tileX, tileY] >= 0;
+        var mapValue = _mapData[tileY, tileX];
+        return mapValue > 0;
     }
 }
