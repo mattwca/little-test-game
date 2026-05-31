@@ -11,6 +11,11 @@ namespace Engine.Rendering;
 
 public class SpriteRenderer
 {
+    /// <summary>
+    /// Max world height for layer depth calcs
+    /// </summary>
+    private const int MAX_WORLD_HEIGHT = 1000;
+
     private readonly ContentManager _contentManager;
     private readonly GraphicsDevice _graphicsDevice;
     private readonly EntityManager _entityManager;
@@ -72,6 +77,8 @@ public class SpriteRenderer
                 (renderingComponent.FlipX ? SpriteEffects.FlipHorizontally : SpriteEffects.None)
                 | (renderingComponent.FlipY ? SpriteEffects.FlipVertically : SpriteEffects.None);
 
+            var layerDepth = positionComponent.Position.Y / MAX_WORLD_HEIGHT;
+
             _spriteBatch.Draw(
                 renderingComponent.Texture,
                 worldPosition,
@@ -81,7 +88,7 @@ public class SpriteRenderer
                 Vector2.Zero,
                 renderingComponent.Scale,
                 spriteEffect,
-                Math.Clamp(renderingComponent.Layer / 100f, 0f, 1f)
+                layerDepth
             );
         }
 

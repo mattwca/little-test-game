@@ -17,7 +17,7 @@ public static class WallTileDefinitions
                 1,
                 0,
                 TileNeighbours.Left | TileNeighbours.Below | TileNeighbours.Right,
-                boundingBox: new RectangleF(0, 0, 32, 32)
+                boundingBox: new RectangleF(0, 10, 32, 22)
             ),
             new TileDefinition(
                 0,
@@ -35,13 +35,13 @@ public static class WallTileDefinitions
                 2,
                 0,
                 TileNeighbours.Right | TileNeighbours.Below,
-                boundingBox: new RectangleF(9, 0, 22, 32)
+                boundingBox: new RectangleF(9, 10, 22, 22)
             ),
             new TileDefinition(
                 3,
                 0,
                 TileNeighbours.Left | TileNeighbours.Below,
-                boundingBox: new RectangleF(0, 0, 22, 32)
+                boundingBox: new RectangleF(0, 10, 22, 22)
             ),
             new TileDefinition(
                 2,
