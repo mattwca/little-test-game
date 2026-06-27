@@ -4,7 +4,6 @@ using Engine.ECS;
 using Engine.Lighting;
 using Engine.Rendering;
 using Engine.Systems;
-using Engine.Tiling;
 using Engine.Utils;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -42,10 +41,18 @@ public class LittleTestGame : Game
         var animationManager = new AnimationManager();
         animationManager.AddAnimation(new Animation("playerWalking", 6, 32, 32));
 
-        _systemManager.Register(_spriteBatch).Register(GraphicsDevice).Register(Content).Register(animationManager);
+        _systemManager
+            .Register(_spriteBatch)
+            .Register(GraphicsDevice)
+            .Register(Content)
+            .Register(animationManager)
+            .Register(new FPSCounter());
 
         _systemManager.Register(_systemManager.Construct<Helper>());
         _systemManager.Register(_systemManager.Construct<ShapeRenderer>());
+        _systemManager.Register(_systemManager.Construct<TextRenderer>());
+        _systemManager.Register(_systemManager.Construct<SpriteRenderer>());
+        _systemManager.Register(_systemManager.Construct<TileRenderer>());
 
         _systemManager
             .EntityManager.CreateEntity("camera")
@@ -107,7 +114,7 @@ public class LittleTestGame : Game
             .AddComponent(new PlayerComponent())
             .AddComponent(new VisibilityComponent())
             .AddComponent(new AnimationComponent("playerWalking", 30))
-            .AddComponent(new BoundingBoxComponent(new Vector2(0, 16), 32, 16, false));
+            .AddComponent(new BoundingBoxComponent(new Vector2(8, 16), 16, 16, false));
 
         _systemManager
             .EntityManager.CreateEntity("mapBase")
@@ -132,15 +139,10 @@ public class LittleTestGame : Game
         _systemManager.AddSystem<PlayerSystem>();
         _systemManager.AddSystem<MapSystem>();
         _systemManager.AddSystem<PhysicsSystem>();
-
         _systemManager.AddSystem<AnimationSystem>();
-
-        _systemManager.Register(_systemManager.Construct<SpriteRenderer>());
-
         _systemManager.AddSystem<LightSystem>();
-
-        _systemManager.Register(_systemManager.Construct<TileRenderer>());
         _systemManager.AddSystem<RenderingSystem>();
+        _systemManager.AddSystem<DebugTextSystem>();
         _systemManager.AddSystem<CameraSystem>();
     }
 
