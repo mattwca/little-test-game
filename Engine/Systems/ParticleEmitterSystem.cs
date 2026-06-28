@@ -103,11 +103,23 @@ public class ParticleEmitterSystem : IUpdateSystem
             return;
         }
 
-        emitterComponent.Accumulator += emitterComponent.SpawnRate * dt;
-        while (emitterComponent.Accumulator >= 1f)
+        if (emitterComponent.EmitterType == ParticleEmitterType.CONTINUOUS)
         {
-            SpawnParticle(emitterComponent);
-            emitterComponent.Accumulator -= 1f;
+            emitterComponent.Accumulator += emitterComponent.SpawnRate * dt;
+            while (emitterComponent.Accumulator >= 1f)
+            {
+                SpawnParticle(emitterComponent);
+                emitterComponent.Accumulator -= 1f;
+            }
+        }
+        else if (emitterComponent.EmitterType == ParticleEmitterType.BURST && !emitterComponent.HasFired)
+        {
+            for (var i = 0; i < emitterComponent.Particles.Length; i++)
+            {
+                SpawnParticle(emitterComponent);
+            }
+
+            emitterComponent.HasFired = true;
         }
 
         for (var i = 0; i < emitterComponent.Particles.Length; i++)

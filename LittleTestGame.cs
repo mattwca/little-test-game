@@ -133,7 +133,16 @@ public class LittleTestGame : Game
             .EntityManager.CreateEntity("playerJumpParticles")
             .AddComponent(new PositionComponent(new Vector2(300f, 300f)))
             .AddComponent(
-                new ParticleEmitterComponent("Particles/playerJump", 10f, 1f, jumpParticleShape, 100f, true, 100)
+                new ParticleEmitterComponent(
+                    "Particles/playerJump",
+                    10f,
+                    1f,
+                    jumpParticleShape,
+                    100f,
+                    true,
+                    100,
+                    emitterType: ParticleEmitterType.BURST
+                )
             );
 
         _systemManager
