@@ -10,11 +10,14 @@ namespace Engine.Systems;
 public class ParticleEmitterSystem : IUpdateSystem
 {
     private readonly EntityManager _entityManager;
+    private readonly EntityCleanupSystem _cleanupSystem;
+
     private readonly Random _random;
 
-    public ParticleEmitterSystem(EntityManager entityManager)
+    public ParticleEmitterSystem(EntityManager entityManager, EntityCleanupSystem cleanupSystem)
     {
         _entityManager = entityManager;
+        _cleanupSystem = cleanupSystem;
 
         _random = new Random();
     }
@@ -83,6 +86,9 @@ public class ParticleEmitterSystem : IUpdateSystem
             return;
         }
 
+        // var rotation = 0f;
+        // if (emitter.RotationBounds is not null) { }
+
         var updatedParticle = new Particle()
         {
             Position = particle.Position + particle.Velocity * dt,
@@ -100,6 +106,7 @@ public class ParticleEmitterSystem : IUpdateSystem
 
         if (!emitterComponent.Enabled)
         {
+            emitterComponent.HasFired = false;
             return;
         }
 
@@ -112,14 +119,26 @@ public class ParticleEmitterSystem : IUpdateSystem
                 emitterComponent.Accumulator -= 1f;
             }
         }
-        else if (emitterComponent.EmitterType == ParticleEmitterType.BURST && !emitterComponent.HasFired)
+        else if (emitterComponent.EmitterType == ParticleEmitterType.BURST)
         {
-            for (var i = 0; i < emitterComponent.Particles.Length; i++)
+            if (!emitterComponent.HasFired)
             {
-                SpawnParticle(emitterComponent);
-            }
+                for (var i = 0; i < emitterComponent.Particles.Length; i++)
+                {
+                    SpawnParticle(emitterComponent);
+                }
 
-            emitterComponent.HasFired = true;
+                emitterComponent.HasFired = true;
+            }
+            else
+            {
+                // Check whether all particles have died - if they have, remove the emitter.
+                if (emitterComponent.Particles.All((particle) => particle.Age <= 0))
+                {
+                    _cleanupSystem.MarkForCleanup(particleEmitterEntity.Id);
+                    return;
+                }
+            }
         }
 
         for (var i = 0; i < emitterComponent.Particles.Length; i++)

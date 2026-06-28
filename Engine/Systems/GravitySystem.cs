@@ -27,6 +27,8 @@ public class GravitySystem : IUpdateSystem
             var heightComponent = entity.GetComponent<HeightComponent>();
             var dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
+            var wasGrounded = heightComponent.Grounded;
+
             heightComponent.ZVelocity -= GRAVITY * dt;
             heightComponent.Z += heightComponent.ZVelocity * dt;
 
@@ -35,6 +37,8 @@ public class GravitySystem : IUpdateSystem
                 heightComponent.Z = 0f;
                 heightComponent.ZVelocity = 0f;
             }
+
+            heightComponent.WasGrounded = wasGrounded;
         }
     }
 }

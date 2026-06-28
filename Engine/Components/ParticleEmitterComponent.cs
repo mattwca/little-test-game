@@ -12,16 +12,16 @@ public enum ParticleEmitterType
 
 public class ParticleEmitterComponent(
     string particleTexture,
-    float spawnRate,
     float maxAge,
     IParticleEmitterShape emitterShape,
     float velocity,
+    float spawnRate = 1f,
     bool enabled = true,
     int particleCount = 100,
     bool fadeOut = true,
     bool castsShadows = true,
-    int fixedParticleCount = 0,
-    ParticleEmitterType emitterType = ParticleEmitterType.CONTINUOUS
+    ParticleEmitterType emitterType = ParticleEmitterType.CONTINUOUS,
+    (int Min, int Max)? rotationBounds = null
 ) : IComponent
 {
     public string ParticleTexture { get; set; } = particleTexture;
@@ -37,9 +37,16 @@ public class ParticleEmitterComponent(
     public Particle[] Particles { get; } = new Particle[particleCount];
     public bool FadeOut { get; set; } = fadeOut;
     public bool CastsShadows { get; set; } = castsShadows;
-    public int FixedParticleCount { get; set; } = fixedParticleCount;
     public ParticleEmitterType EmitterType { get; set; } = emitterType;
+    public (int Min, int Max)? RotationBounds { get; set; } = rotationBounds;
 
+    /// <summary>
+    /// (Internal state) Spawn accumulator.
+    /// </summary>
     public float Accumulator { get; set; } = 0f;
+
+    /// <summary>
+    /// (Internal state) Flag indicating whether a burst emitter has fired.
+    /// </summary>
     public bool HasFired { get; set; } = false;
 }

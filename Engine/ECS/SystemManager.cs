@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using Engine.Systems;
 using Microsoft.Xna.Framework;
 
 namespace Engine.ECS;
@@ -37,6 +37,8 @@ public class SystemManager
 
         _updateSystems = [];
         _renderSystems = [];
+
+        AddSystem<EntityCleanupSystem>();
     }
 
     public SystemManager Register<T>(T dependency)

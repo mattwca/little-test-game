@@ -1,8 +1,8 @@
 using System;
-using System.Linq;
 using Components;
 using Engine.Components;
 using Engine.ECS;
+using Engine.Particles;
 using Engine.Utils;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
@@ -33,15 +33,21 @@ public class PlayerSystem : IUpdateSystem
     {
         _keyboardHandler.OnUpdate();
 
-        HandlePlayerMovement(gameTime);
-        HandleOtherInput();
+        var playerEntity = _entityManager.GetEntityWithComponent<PlayerComponent>();
+        if (playerEntity is null)
+        {
+            return;
+        }
 
-        UpdatePlayerShadow();
+        HandlePlayerMovement(playerEntity, gameTime);
+        HandleOtherInput(playerEntity);
+        HandlePlayerJumped(playerEntity);
+
+        UpdatePlayerShadow(playerEntity);
     }
 
-    private void UpdatePlayerShadow()
+    private void UpdatePlayerShadow(Entity playerEntity)
     {
-        var playerEntity = _entityManager.GetEntityWithComponent<PlayerComponent>();
         var playerShadowEntity = _entityManager.GetEntity("playerShadow");
 
         var playerHeightComponent = playerEntity.GetComponent<HeightComponent>();
@@ -55,7 +61,33 @@ public class PlayerSystem : IUpdateSystem
         }
     }
 
-    private void HandleOtherInput()
+    private void HandlePlayerJumped(Entity playerEntity)
+    {
+        var heightComponent = playerEntity.GetComponent<HeightComponent>();
+        var playerPosition = playerEntity.GetComponent<PositionComponent>();
+
+        if (heightComponent.Grounded && !heightComponent.WasGrounded)
+        {
+            var newEntityId = $"playerJumpParticles-{Guid.NewGuid()}";
+            _entityManager
+                .CreateEntity(newEntityId)
+                .AddComponent(new PositionComponent(playerPosition.Position + new Vector2(12, 32)))
+                .AddComponent(
+                    new ParticleEmitterComponent(
+                        "Particles/playerJump",
+                        0.5f,
+                        new ParticleEmitterArc(-50, 50),
+                        50f,
+                        fadeOut: true,
+                        particleCount: 5,
+                        emitterType: ParticleEmitterType.BURST,
+                        castsShadows: false
+                    )
+                );
+        }
+    }
+
+    private void HandleOtherInput(Entity playerEntity)
     {
         if (_keyboardHandler.WasKeyPressed(Keys.OemTilde))
         {
@@ -68,9 +100,8 @@ public class PlayerSystem : IUpdateSystem
         }
     }
 
-    private void HandlePlayerMovement(GameTime gameTime)
+    private void HandlePlayerMovement(Entity playerEntity, GameTime gameTime)
     {
-        var playerEntity = _entityManager.GetEntitiesWithComponent<PlayerComponent>().First();
         var playerComponent = playerEntity.GetComponent<PlayerComponent>();
         var positionComponent = playerEntity.GetComponent<PositionComponent>();
         var animationComponent = playerEntity.GetComponent<AnimationComponent>();

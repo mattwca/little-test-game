@@ -8,6 +8,11 @@ public class Entity
 {
     public string Id { get; }
 
+    /// <summary>
+    /// Whether this entity has been marked for deletion or not.
+    /// </summary>
+    public bool ShouldDelete { get; }
+
     private readonly Dictionary<Type, List<IComponent>> _components;
 
     public Entity(string id)
