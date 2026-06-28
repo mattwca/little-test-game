@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using Engine.Components;
 using Engine.ECS;
+using Engine.Particles;
 using Microsoft.Xna.Framework;
 
 namespace Engine.Systems;
@@ -18,23 +19,57 @@ public class ParticleEmitterSystem : IUpdateSystem
         _random = new Random();
     }
 
+    private (Vector2 spawnPosition, Vector2 spawnDirection) GetParticleAttributes(
+        ParticleEmitterComponent particleEmitterComponent
+    )
+    {
+        if (particleEmitterComponent.EmitterShape is ParticleEmitterPoint point)
+        {
+            return (Vector2.Zero, point.Direction);
+        }
+        else if (particleEmitterComponent.EmitterShape is ParticleEmitterRect rect)
+        {
+            var spawnX = _random.Next(rect.Rectangle.Left, rect.Rectangle.Right);
+            var spawnY = _random.Next(rect.Rectangle.Top, rect.Rectangle.Bottom);
+
+            return (new Vector2(spawnX, spawnY), rect.Direction);
+        }
+        else if (particleEmitterComponent.EmitterShape is ParticleEmitterCircle circle)
+        {
+            var spawnAngle = MathHelper.ToRadians(_random.Next(360));
+            var spawnRadius = _random.NextSingle() * circle.Radius;
+
+            var spawnDirection = new Vector2(MathF.Sin(spawnAngle), -MathF.Cos(spawnAngle));
+            var spawnPosition = spawnDirection * spawnRadius;
+
+            return (spawnPosition, spawnDirection);
+        }
+        else if (particleEmitterComponent.EmitterShape is ParticleEmitterArc arc)
+        {
+            var spawnAngle = MathHelper.ToRadians(_random.Next(arc.MinAngle, arc.MaxAngle));
+            var spawnDirection = new Vector2(MathF.Sin(spawnAngle), -MathF.Cos(spawnAngle));
+
+            return (Vector2.Zero, spawnDirection);
+        }
+
+        throw new Exception("Unknown particle emitter shape");
+    }
+
     private void SpawnParticle(ParticleEmitterComponent particleEmitterComponent)
     {
-        var freeParticleIndex = particleEmitterComponent.Particles.ToList().FindIndex(particle => particle.Age == 0f);
+        var freeParticleIndex = particleEmitterComponent.Particles.ToList().FindIndex(particle => particle.Age <= 0f);
         if (freeParticleIndex == -1)
         {
             return;
         }
 
-        Console.WriteLine("Spawning Particle!");
+        var (spawnPosition, spawnDirection) = GetParticleAttributes(particleEmitterComponent);
 
         var newParticle = new Particle()
         {
-            Position = Vector2.Zero,
+            Position = spawnPosition,
             Age = particleEmitterComponent.MaxAge,
-            Velocity =
-                particleEmitterComponent.Direction
-                * new Vector2(_random.NextSingle() * 10f, _random.NextSingle() * 10f),
+            Velocity = spawnDirection * particleEmitterComponent.Velocity,
         };
 
         particleEmitterComponent.Particles[freeParticleIndex] = newParticle;
@@ -43,18 +78,15 @@ public class ParticleEmitterSystem : IUpdateSystem
     private void UpdateParticle(ParticleEmitterComponent emitter, int particleIndex, float dt)
     {
         var particle = emitter.Particles[particleIndex];
-        if (particle.Age == 0f)
+        if (particle.Age <= 0f)
         {
             return;
         }
 
-        Console.WriteLine("Updating particle!");
-        Console.WriteLine(particle.Velocity);
-
         var updatedParticle = new Particle()
         {
             Position = particle.Position + particle.Velocity * dt,
-            Age = particle.Age - 0.5f,
+            Age = particle.Age - dt,
             Velocity = particle.Velocity,
         };
 

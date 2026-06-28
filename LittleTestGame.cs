@@ -3,6 +3,7 @@ using Engine.Animation;
 using Engine.Components;
 using Engine.ECS;
 using Engine.Lighting;
+using Engine.Particles;
 using Engine.Rendering;
 using Engine.Systems;
 using Engine.Utils;
@@ -126,10 +127,14 @@ public class LittleTestGame : Game
                 )
             );
 
+        var jumpParticleShape = new ParticleEmitterArc(-30, 30);
+
         _systemManager
             .EntityManager.CreateEntity("playerJumpParticles")
             .AddComponent(new PositionComponent(new Vector2(300f, 300f)))
-            .AddComponent(new ParticleEmitterComponent("bullet", 1f, 100f, new Vector2(0f, 10f), true, 100));
+            .AddComponent(
+                new ParticleEmitterComponent("Particles/playerJump", 10f, 1f, jumpParticleShape, 100f, true, 100)
+            );
 
         _systemManager
             .EntityManager.CreateEntity("mapBase")

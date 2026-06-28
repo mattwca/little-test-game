@@ -1,33 +1,35 @@
-using System.Collections.Generic;
 using Engine.ECS;
+using Engine.Particles;
 using Microsoft.Xna.Framework;
 
 namespace Engine.Components;
-
-public struct Particle
-{
-    public Vector2 Position { get; set; }
-    public Vector2 Velocity { get; set; }
-    public float Rotation { get; set; }
-    public float Age { get; set; }
-    public bool Visible { get; set; }
-}
 
 public class ParticleEmitterComponent(
     string particleTexture,
     float spawnRate,
     float maxAge,
-    Vector2 direction,
+    IParticleEmitterShape emitterShape,
+    float velocity,
     bool enabled = true,
     int particleCount = 100,
-    bool castsShadows = true
+    bool fadeOut = true,
+    bool castsShadows = true,
+    int fixedParticleCount = 0
 ) : IComponent
 {
     public string ParticleTexture { get; set; } = particleTexture;
     public float SpawnRate { get; set; } = spawnRate;
+
+    /// <summary>
+    /// Max age (in seconds) for each particle.
+    /// </summary>
     public float MaxAge { get; set; } = maxAge;
-    public Vector2 Direction { get; set; } = direction;
+    public IParticleEmitterShape EmitterShape { get; set; } = emitterShape;
+    public float Velocity { get; set; } = velocity;
     public bool Enabled { get; set; } = enabled;
     public Particle[] Particles { get; } = new Particle[particleCount];
     public float Accumulator { get; set; } = 0f;
+    public bool FadeOut { get; set; } = fadeOut;
+    public bool CastsShadows { get; set; } = castsShadows;
+    public int FixedParticleCount { get; set; } = fixedParticleCount;
 }

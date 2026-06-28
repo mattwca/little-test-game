@@ -1,3 +1,5 @@
+using System;
+using System.Linq;
 using Engine.Components;
 using Engine.ECS;
 using Engine.Utils;
@@ -27,13 +29,14 @@ public class ParticleRenderer
         _helper = helper;
     }
 
-    public void RenderParticles()
+    public void RenderParticles(bool onlyShadowCasters = false)
     {
         var cameraTransform = _helper.GetCameraTransform();
 
         _spriteBatch.Begin(
             sortMode: SpriteSortMode.FrontToBack,
             samplerState: SamplerState.PointClamp,
+            blendState: BlendState.AlphaBlend,
             transformMatrix: cameraTransform
         // effect: _spriteEffect
         );
@@ -42,6 +45,20 @@ public class ParticleRenderer
             typeof(ParticleEmitterComponent),
             typeof(PositionComponent)
         );
+
+        if (onlyShadowCasters)
+        {
+            emitterEntities =
+            [
+                .. emitterEntities.Where(
+                    (entity) =>
+                    {
+                        var emitterComponent = entity.GetComponent<ParticleEmitterComponent>();
+                        return emitterComponent.CastsShadows;
+                    }
+                ),
+            ];
+        }
 
         foreach (var emitter in emitterEntities)
         {
@@ -52,13 +69,15 @@ public class ParticleRenderer
 
             foreach (var particle in emitterComponent.Particles)
             {
-                if (particle.Age > emitterComponent.MaxAge)
+                if (particle.Age <= 0)
                 {
                     continue;
                 }
 
                 var worldPosition = emitterPosition.Position + particle.Position;
-                _spriteBatch.Draw(emitterTexture, worldPosition, Color.White);
+                var opacity = (particle.Age / emitterComponent.MaxAge * 128) / 128;
+
+                _spriteBatch.Draw(emitterTexture, worldPosition, new Color(opacity, opacity, opacity, opacity));
             }
         }
 

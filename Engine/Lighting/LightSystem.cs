@@ -1,11 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
-
 using Engine.Components;
 using Engine.ECS;
 using Engine.Rendering;
 using Engine.Utils;
-
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -19,6 +17,7 @@ public class LightSystem : IRenderSystem, IUpdateSystem, IRenderSystemOrder
     private readonly GraphicsDevice _graphicsDevice;
     private readonly SpriteBatch _spriteBatch;
     private readonly SpriteRenderer _spriteRenderer;
+    private readonly ParticleRenderer _particleRenderer;
 
     private readonly RenderTarget2D _occluderTexture;
     private readonly Effect _shadowMapEffect;
@@ -34,7 +33,8 @@ public class LightSystem : IRenderSystem, IUpdateSystem, IRenderSystemOrder
         ContentManager contentManager,
         GraphicsDevice graphicsDevice,
         SpriteBatch spriteBatch,
-        SpriteRenderer spriteRenderer
+        SpriteRenderer spriteRenderer,
+        ParticleRenderer particleRenderer
     )
     {
         _entityManager = entityManager;
@@ -42,6 +42,7 @@ public class LightSystem : IRenderSystem, IUpdateSystem, IRenderSystemOrder
         _graphicsDevice = graphicsDevice;
         _spriteBatch = spriteBatch;
         _spriteRenderer = spriteRenderer;
+        _particleRenderer = particleRenderer;
 
         ShadowMaps = new Dictionary<string, RenderTarget2D>();
 
@@ -103,6 +104,7 @@ public class LightSystem : IRenderSystem, IUpdateSystem, IRenderSystemOrder
                         return renderComponent.CastsShadow;
                     }
                 );
+                _particleRenderer.RenderParticles(onlyShadowCasters: true);
             }
         );
     }
