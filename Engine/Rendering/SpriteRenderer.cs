@@ -52,16 +52,7 @@ public class SpriteRenderer
                 typeof(VisibilityComponent)
             )
             .Where((entity) => entity.GetComponent<VisibilityComponent>().IsVisible)
-            .SelectMany(
-                (entity) =>
-                {
-                    var positionComponent = entity.GetComponent<PositionComponent>();
-                    var renderingComponents = entity.GetComponents<RenderingComponent>();
-
-                    return renderingComponents.Select((renderingComponent) => (positionComponent, renderingComponent));
-                }
-            )
-            .Where((components) => filter == null ? true : filter(components.renderingComponent));
+            .ToArray();
 
         _spriteBatch.Begin(
             sortMode: SpriteSortMode.FrontToBack,
@@ -70,26 +61,42 @@ public class SpriteRenderer
             effect: _spriteEffect
         );
 
-        foreach (var (positionComponent, renderingComponent) in entitiesToRender)
+        foreach (var entity in entitiesToRender)
         {
-            var worldPosition = positionComponent.Position + renderingComponent.Offset;
-            var spriteEffect =
-                (renderingComponent.FlipX ? SpriteEffects.FlipHorizontally : SpriteEffects.None)
-                | (renderingComponent.FlipY ? SpriteEffects.FlipVertically : SpriteEffects.None);
+            var heightComponent = entity.GetComponentOptional<HeightComponent>();
+            var renderingComponents = entity.GetComponents<RenderingComponent>();
+            var positionComponent = entity.GetComponent<PositionComponent>();
 
-            var layerDepth = positionComponent.Position.Y / MAX_WORLD_HEIGHT;
+            foreach (var renderingComponent in renderingComponents)
+            {
+                if (filter is not null && !filter(renderingComponent))
+                {
+                    continue;
+                }
 
-            _spriteBatch.Draw(
-                renderingComponent.Texture,
-                worldPosition,
-                renderingComponent.SourceRectangle,
-                renderingComponent.Colour,
-                positionComponent.Rotation,
-                Vector2.Zero,
-                renderingComponent.Scale,
-                spriteEffect,
-                layerDepth
-            );
+                var worldPosition =
+                    positionComponent.Position
+                    + renderingComponent.Offset
+                    - (heightComponent is null ? Vector2.Zero : new Vector2(0, heightComponent.Z));
+
+                var spriteEffect =
+                    (renderingComponent.FlipX ? SpriteEffects.FlipHorizontally : SpriteEffects.None)
+                    | (renderingComponent.FlipY ? SpriteEffects.FlipVertically : SpriteEffects.None);
+
+                var layerDepth = positionComponent.Position.Y / MAX_WORLD_HEIGHT;
+
+                _spriteBatch.Draw(
+                    renderingComponent.Texture,
+                    worldPosition,
+                    renderingComponent.SourceRectangle,
+                    renderingComponent.Colour,
+                    positionComponent.Rotation,
+                    renderingComponent.Origin,
+                    renderingComponent.Scale,
+                    spriteEffect,
+                    layerDepth
+                );
+            }
         }
 
         _spriteBatch.End();

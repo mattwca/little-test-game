@@ -1,4 +1,5 @@
-﻿using Engine.Animation;
+﻿using Components;
+using Engine.Animation;
 using Engine.Components;
 using Engine.ECS;
 using Engine.Lighting;
@@ -8,6 +9,7 @@ using Engine.Utils;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Systems;
 
 public class LittleTestGame : Game
 {
@@ -53,6 +55,7 @@ public class LittleTestGame : Game
         _systemManager.Register(_systemManager.Construct<TextRenderer>());
         _systemManager.Register(_systemManager.Construct<SpriteRenderer>());
         _systemManager.Register(_systemManager.Construct<TileRenderer>());
+        _systemManager.Register(_systemManager.Construct<ParticleRenderer>());
 
         _systemManager
             .EntityManager.CreateEntity("camera")
@@ -98,23 +101,35 @@ public class LittleTestGame : Game
         _systemManager
             .EntityManager.CreateEntity("player")
             .AddComponent(new PositionComponent(new Vector2(150, 50), 32, 32))
+            .AddComponent(new HeightComponent())
             .AddComponent(
                 new RenderingComponent(Content.Load<Texture2D>("player"), Color.White, layer: 2, castsShadow: true)
-            )
-            .AddComponent(
-                new RenderingComponent(
-                    Content.Load<Texture2D>("shadow"),
-                    new Color(255, 255, 255, 128),
-                    new Vector2(8, 24),
-                    layer: 1,
-                    0.5f,
-                    castsShadow: false
-                )
             )
             .AddComponent(new PlayerComponent())
             .AddComponent(new VisibilityComponent())
             .AddComponent(new AnimationComponent("playerWalking", 30))
             .AddComponent(new BoundingBoxComponent(new Vector2(8, 16), 16, 16, false));
+
+        _systemManager
+            .EntityManager.CreateEntity("playerShadow")
+            .AddComponent(new PositionComponent(Vector2.Zero))
+            .AddComponent(new AttachedComponent("player", new Vector2(16, 32)))
+            .AddComponent(new VisibilityComponent())
+            .AddComponent(
+                new RenderingComponent(
+                    Content.Load<Texture2D>("shadow"),
+                    new Color(255, 255, 255, 128),
+                    origin: new Vector2(16, 16),
+                    layer: 1,
+                    // scale: 1,
+                    castsShadow: false
+                )
+            );
+
+        _systemManager
+            .EntityManager.CreateEntity("playerJumpParticles")
+            .AddComponent(new PositionComponent(new Vector2(300f, 300f)))
+            .AddComponent(new ParticleEmitterComponent("bullet", 1f, 100f, new Vector2(0f, 10f), true, 100));
 
         _systemManager
             .EntityManager.CreateEntity("mapBase")
@@ -137,11 +152,14 @@ public class LittleTestGame : Game
 
         _systemManager.AddSystem<VisibilitySystem>();
         _systemManager.AddSystem<PlayerSystem>();
+        _systemManager.AddSystem<AttachedSystem>();
         _systemManager.AddSystem<MapSystem>();
         _systemManager.AddSystem<PhysicsSystem>();
+        _systemManager.AddSystem<GravitySystem>();
         _systemManager.AddSystem<AnimationSystem>();
         _systemManager.AddSystem<LightSystem>();
         _systemManager.AddSystem<RenderingSystem>();
+        _systemManager.AddSystem<ParticleEmitterSystem>();
         _systemManager.AddSystem<DebugTextSystem>();
         _systemManager.AddSystem<CameraSystem>();
     }

@@ -1,5 +1,4 @@
 using Engine.Components;
-
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -20,7 +19,7 @@ public class TiledRenderingComponent : RenderingComponent
         float scale = 1f,
         bool castsShadow = false
     )
-        : base(texture, colour, offset, layer, scale, castsShadow)
+        : base(texture, colour, offset, Vector2.Zero, layer, scale, castsShadow)
     {
         TileSize = tileSize;
         TilesX = tilesX;

@@ -87,6 +87,17 @@ public class Entity
         _components[componentType] = [updatedComponent];
     }
 
+    public T? GetComponentOptional<T>()
+        where T : IComponent
+    {
+        if (!_components.ContainsKey(typeof(T)))
+        {
+            return default;
+        }
+
+        return (T)_components[typeof(T)].First();
+    }
+
     public T GetComponent<T>()
         where T : IComponent
     {

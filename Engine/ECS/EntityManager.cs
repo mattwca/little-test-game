@@ -31,6 +31,9 @@ public class EntityManager
     public Entity? GetEntityWithComponent<T>()
         where T : IComponent => Entities.Find((entity) => entity.HasComponent<T>());
 
+    public Entity? GetEntityWithComponents(params Type[] components) =>
+        Entities.Find((entity) => entity.HasComponents(components));
+
     public List<Entity> GetEntitiesWithComponent<T>()
         where T : IComponent => Entities.FindAll((entity) => entity.HasComponent<T>());
 

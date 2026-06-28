@@ -1,5 +1,4 @@
 using Engine.ECS;
-
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -10,6 +9,7 @@ public class RenderingComponent : IComponent
     public Texture2D Texture { get; }
     public Color Colour { get; set; }
     public Vector2 Offset { get; set; }
+    public Vector2 Origin { get; set; }
     public int Layer { get; }
     public float Scale { get; set; }
     public bool FlipX { get; set; }
@@ -21,6 +21,7 @@ public class RenderingComponent : IComponent
         Texture2D texture,
         Color colour = default,
         Vector2 offset = default,
+        Vector2 origin = default,
         int layer = 0,
         float scale = 1f,
         bool flipX = false,
@@ -32,6 +33,7 @@ public class RenderingComponent : IComponent
         Texture = texture;
         Colour = colour;
         Offset = offset;
+        Origin = origin;
         Layer = layer;
         Scale = scale;
         FlipX = flipX;
