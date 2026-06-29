@@ -54,7 +54,7 @@ public class ParticleRenderer
                     (entity) =>
                     {
                         var emitterComponent = entity.GetComponent<ParticleEmitterComponent>();
-                        return emitterComponent.CastsShadows;
+                        return emitterComponent.ParticleType.CastsShadow;
                     }
                 ),
             ];
@@ -65,7 +65,7 @@ public class ParticleRenderer
             var emitterComponent = emitter.GetComponent<ParticleEmitterComponent>();
             var emitterPosition = emitter.GetComponent<PositionComponent>();
 
-            var emitterTexture = _contentManager.Load<Texture2D>(emitterComponent.ParticleTexture);
+            var emitterTexture = _contentManager.Load<Texture2D>(emitterComponent.ParticleType.ParticleTexture);
 
             foreach (var particle in emitterComponent.Particles)
             {
@@ -75,9 +75,15 @@ public class ParticleRenderer
                 }
 
                 var worldPosition = emitterPosition.Position + particle.Position;
-                var opacity = (particle.Age / emitterComponent.MaxAge * 128) / 128;
 
-                _spriteBatch.Draw(emitterTexture, worldPosition, new Color(opacity, opacity, opacity, opacity));
+                var fadeOutValue = emitterComponent.ParticleType.FadeOut
+                    ? (particle.Age / emitterComponent.SpawnConfig.LifespanSeconds * 128) / 128
+                    : 128;
+                var fadeOutColour = new Color(fadeOutValue, fadeOutValue, fadeOutValue, fadeOutValue);
+
+                var particleColour = particle.Colour * fadeOutColour;
+
+                _spriteBatch.Draw(emitterTexture, worldPosition, particleColour);
             }
         }
 

@@ -10,35 +10,36 @@ public enum ParticleEmitterType
     BURST,
 }
 
+public record ParticleRotation(float MinAngle, float MaxAngle, float Speed);
+
+public record ParticleSpawnConfig(
+    int ParticleCount,
+    float Velocity = 50f,
+    float LifespanSeconds = 10f,
+    float? SpawnRate = null,
+    ParticleRotation? Rotation = null
+);
+
+public record ParticleTypeConfig(string ParticleTexture, bool FadeOut = true, bool CastsShadow = false);
+
+public record ParticleColourConfig(Color StartColour, Color? EndColour = null);
+
 public class ParticleEmitterComponent(
-    string particleTexture,
-    float maxAge,
+    ParticleTypeConfig particleType,
+    ParticleSpawnConfig spawnConfig,
+    ParticleColourConfig colourConfig,
     IParticleEmitterShape emitterShape,
-    float velocity,
-    float spawnRate = 1f,
-    bool enabled = true,
-    int particleCount = 100,
-    bool fadeOut = true,
-    bool castsShadows = true,
     ParticleEmitterType emitterType = ParticleEmitterType.CONTINUOUS,
-    (int Min, int Max)? rotationBounds = null
+    bool enabled = true
 ) : IComponent
 {
-    public string ParticleTexture { get; set; } = particleTexture;
-    public float SpawnRate { get; set; } = spawnRate;
-
-    /// <summary>
-    /// Max age (in seconds) for each particle.
-    /// </summary>
-    public float MaxAge { get; set; } = maxAge;
+    public ParticleTypeConfig ParticleType { get; set; } = particleType;
+    public ParticleSpawnConfig SpawnConfig { get; set; } = spawnConfig;
+    public ParticleColourConfig ColourConfig { get; set; } = colourConfig;
     public IParticleEmitterShape EmitterShape { get; set; } = emitterShape;
-    public float Velocity { get; set; } = velocity;
-    public bool Enabled { get; set; } = enabled;
-    public Particle[] Particles { get; } = new Particle[particleCount];
-    public bool FadeOut { get; set; } = fadeOut;
-    public bool CastsShadows { get; set; } = castsShadows;
     public ParticleEmitterType EmitterType { get; set; } = emitterType;
-    public (int Min, int Max)? RotationBounds { get; set; } = rotationBounds;
+    public Particle[] Particles { get; } = new Particle[spawnConfig.ParticleCount];
+    public bool Enabled { get; set; } = enabled;
 
     /// <summary>
     /// (Internal state) Spawn accumulator.

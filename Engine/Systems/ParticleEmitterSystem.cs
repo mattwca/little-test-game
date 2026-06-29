@@ -71,8 +71,9 @@ public class ParticleEmitterSystem : IUpdateSystem
         var newParticle = new Particle()
         {
             Position = spawnPosition,
-            Age = particleEmitterComponent.MaxAge,
-            Velocity = spawnDirection * particleEmitterComponent.Velocity,
+            Age = particleEmitterComponent.SpawnConfig.LifespanSeconds,
+            Velocity = spawnDirection * particleEmitterComponent.SpawnConfig.Velocity,
+            Colour = particleEmitterComponent.ColourConfig.StartColour,
         };
 
         particleEmitterComponent.Particles[freeParticleIndex] = newParticle;
@@ -89,11 +90,22 @@ public class ParticleEmitterSystem : IUpdateSystem
         // var rotation = 0f;
         // if (emitter.RotationBounds is not null) { }
 
+        var updatedColour = emitter.ColourConfig.StartColour;
+        if (emitter.ColourConfig.EndColour is not null)
+        {
+            updatedColour = Color.Lerp(
+                emitter.ColourConfig.StartColour,
+                emitter.ColourConfig.EndColour.Value,
+                1 - (particle.Age / emitter.SpawnConfig.LifespanSeconds)
+            );
+        }
+
         var updatedParticle = new Particle()
         {
             Position = particle.Position + particle.Velocity * dt,
             Age = particle.Age - dt,
             Velocity = particle.Velocity,
+            Colour = updatedColour,
         };
 
         emitter.Particles[particleIndex] = updatedParticle;
@@ -112,7 +124,12 @@ public class ParticleEmitterSystem : IUpdateSystem
 
         if (emitterComponent.EmitterType == ParticleEmitterType.CONTINUOUS)
         {
-            emitterComponent.Accumulator += emitterComponent.SpawnRate * dt;
+            if (emitterComponent.SpawnConfig.SpawnRate is null)
+            {
+                throw new Exception("Continuous emitter must have a spawn rate");
+            }
+
+            emitterComponent.Accumulator += emitterComponent.SpawnConfig.SpawnRate.Value * dt;
             while (emitterComponent.Accumulator >= 1f)
             {
                 SpawnParticle(emitterComponent);

@@ -74,14 +74,11 @@ public class PlayerSystem : IUpdateSystem
                 .AddComponent(new PositionComponent(playerPosition.Position + new Vector2(12, 32)))
                 .AddComponent(
                     new ParticleEmitterComponent(
-                        "Particles/playerJump",
-                        0.5f,
+                        particleType: new ParticleTypeConfig("Particles/playerJump", CastsShadow: false),
+                        spawnConfig: new ParticleSpawnConfig(5, 50f, 0.5f),
+                        colourConfig: new ParticleColourConfig(Color.LightGray, Color.DarkGray),
                         new ParticleEmitterArc(-50, 50),
-                        50f,
-                        fadeOut: true,
-                        particleCount: 5,
-                        emitterType: ParticleEmitterType.BURST,
-                        castsShadows: false
+                        emitterType: ParticleEmitterType.BURST
                     )
                 );
         }

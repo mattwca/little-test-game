@@ -8,4 +8,5 @@ public struct Particle
     public Vector2 Velocity { get; set; }
     public float Rotation { get; set; }
     public float Age { get; set; }
+    public Color Colour { get; set; }
 }
