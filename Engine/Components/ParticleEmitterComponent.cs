@@ -20,16 +20,39 @@ public record ParticleSpawnConfig(
     ParticleRotation? Rotation = null
 );
 
-public record ParticleTypeConfig(string ParticleTexture, bool FadeOut = true, bool CastsShadow = false);
+public enum ParticleLightingOption
+{
+    CastsShadow,
+    EmitsLight,
+}
+
+public record ParticleLightingConfig(ParticleLightingOption LightingOption, float? LightRadius = null);
+
+public record ParticleTypeConfig(
+    string ParticleTexture,
+    bool FadeOut = true,
+    ParticleLightingConfig? LightingConfig = null
+);
 
 public record ParticleColourConfig(Color StartColour, Color? EndColour = null);
 
+public record ParticleRenderConfig(float? OverrideDepthZ = null);
+
+/// <summary>
+/// A particle emitter component. Emits a continuous stream of particles, or a single burst.
+///
+/// Various properties of the spawned particles can be configured, including lifetime, speed,
+/// number, colour(s), and how they interact with the lighting system.
+///
+/// When a "burst" particle emitter has finished, the associated entity is deleted.
+/// </summary>
 public class ParticleEmitterComponent(
     ParticleTypeConfig particleType,
     ParticleSpawnConfig spawnConfig,
     ParticleColourConfig colourConfig,
     IParticleEmitterShape emitterShape,
     ParticleEmitterType emitterType = ParticleEmitterType.CONTINUOUS,
+    ParticleRenderConfig? renderConfig = null,
     bool enabled = true
 ) : IComponent
 {
@@ -38,6 +61,7 @@ public class ParticleEmitterComponent(
     public ParticleColourConfig ColourConfig { get; set; } = colourConfig;
     public IParticleEmitterShape EmitterShape { get; set; } = emitterShape;
     public ParticleEmitterType EmitterType { get; set; } = emitterType;
+    public ParticleRenderConfig RenderConfig { get; set; } = renderConfig;
     public Particle[] Particles { get; } = new Particle[spawnConfig.ParticleCount];
     public bool Enabled { get; set; } = enabled;
 

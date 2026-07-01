@@ -58,7 +58,7 @@ public class ParticleEmitterSystem : IUpdateSystem
         throw new Exception("Unknown particle emitter shape");
     }
 
-    private void SpawnParticle(ParticleEmitterComponent particleEmitterComponent)
+    private void SpawnParticle(ParticleEmitterComponent particleEmitterComponent, PositionComponent emitterPosition)
     {
         var freeParticleIndex = particleEmitterComponent.Particles.ToList().FindIndex(particle => particle.Age <= 0f);
         if (freeParticleIndex == -1)
@@ -70,7 +70,7 @@ public class ParticleEmitterSystem : IUpdateSystem
 
         var newParticle = new Particle()
         {
-            Position = spawnPosition,
+            Position = emitterPosition.Position + spawnPosition,
             Age = particleEmitterComponent.SpawnConfig.LifespanSeconds,
             Velocity = spawnDirection * particleEmitterComponent.SpawnConfig.Velocity,
             Colour = particleEmitterComponent.ColourConfig.StartColour,
@@ -132,7 +132,7 @@ public class ParticleEmitterSystem : IUpdateSystem
             emitterComponent.Accumulator += emitterComponent.SpawnConfig.SpawnRate.Value * dt;
             while (emitterComponent.Accumulator >= 1f)
             {
-                SpawnParticle(emitterComponent);
+                SpawnParticle(emitterComponent, emitterPosition);
                 emitterComponent.Accumulator -= 1f;
             }
         }
@@ -142,7 +142,7 @@ public class ParticleEmitterSystem : IUpdateSystem
             {
                 for (var i = 0; i < emitterComponent.Particles.Length; i++)
                 {
-                    SpawnParticle(emitterComponent);
+                    SpawnParticle(emitterComponent, emitterPosition);
                 }
 
                 emitterComponent.HasFired = true;

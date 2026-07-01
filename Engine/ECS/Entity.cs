@@ -68,19 +68,21 @@ public class Entity
         }
     }
 
-    public void RemoveComponents<T>()
+    public Entity RemoveComponents<T>()
         where T : IComponent
     {
         if (!HasComponent<T>())
         {
-            return;
+            return this;
         }
 
         var componentType = typeof(T);
         _components[componentType] = [];
+
+        return this;
     }
 
-    public void ReplaceComponent<T>(T updatedComponent)
+    public Entity ReplaceComponent<T>(T updatedComponent)
         where T : IComponent
     {
         var componentType = typeof(T);
@@ -90,6 +92,8 @@ public class Entity
         }
 
         _components[componentType] = [updatedComponent];
+
+        return this;
     }
 
     public T? GetComponentOptional<T>()

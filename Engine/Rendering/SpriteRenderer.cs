@@ -1,8 +1,6 @@
-using System;
 using System.Linq;
 using Engine.Components;
 using Engine.ECS;
-using Engine.Utils;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -17,34 +15,18 @@ public class SpriteRenderer
     private const int MAX_WORLD_HEIGHT = 1000;
 
     private readonly ContentManager _contentManager;
-    private readonly GraphicsDevice _graphicsDevice;
     private readonly EntityManager _entityManager;
     private readonly SpriteBatch _spriteBatch;
-    private readonly Helper _helprer;
 
-    private readonly Effect _spriteEffect;
-
-    public SpriteRenderer(
-        ContentManager contentManager,
-        GraphicsDevice graphicsDevice,
-        EntityManager entityManager,
-        SpriteBatch spriteBatch,
-        Helper helper
-    )
+    public SpriteRenderer(ContentManager contentManager, EntityManager entityManager, SpriteBatch spriteBatch)
     {
         _contentManager = contentManager;
-        _graphicsDevice = graphicsDevice;
         _entityManager = entityManager;
         _spriteBatch = spriteBatch;
-        _helprer = helper;
-
-        _spriteEffect = _contentManager.Load<Effect>("Effects/SpriteEffect");
     }
 
-    public void RenderSprites(Func<RenderingComponent, bool>? filter = null)
+    public void RenderSprites(bool shadowCastersOnly)
     {
-        var cameraTransform = _helprer.GetCameraTransform();
-
         var entitiesToRender = _entityManager
             .GetEntitiesWithComponents(
                 typeof(PositionComponent),
@@ -54,13 +36,6 @@ public class SpriteRenderer
             .Where((entity) => entity.GetComponent<VisibilityComponent>().IsVisible)
             .ToArray();
 
-        _spriteBatch.Begin(
-            sortMode: SpriteSortMode.FrontToBack,
-            samplerState: SamplerState.PointClamp,
-            transformMatrix: cameraTransform,
-            effect: _spriteEffect
-        );
-
         foreach (var entity in entitiesToRender)
         {
             var heightComponent = entity.GetComponentOptional<HeightComponent>();
@@ -69,7 +44,7 @@ public class SpriteRenderer
 
             foreach (var renderingComponent in renderingComponents)
             {
-                if (filter is not null && !filter(renderingComponent))
+                if (shadowCastersOnly && !renderingComponent.CastsShadow)
                 {
                     continue;
                 }
@@ -79,11 +54,12 @@ public class SpriteRenderer
                     + renderingComponent.Offset
                     - (heightComponent is null ? Vector2.Zero : new Vector2(0, heightComponent.Z));
 
+                var depthZ = renderingComponent.DepthHeightOverride ?? positionComponent.Position.Y;
+                var layer = depthZ / MAX_WORLD_HEIGHT;
+
                 var spriteEffect =
                     (renderingComponent.FlipX ? SpriteEffects.FlipHorizontally : SpriteEffects.None)
                     | (renderingComponent.FlipY ? SpriteEffects.FlipVertically : SpriteEffects.None);
-
-                var layerDepth = positionComponent.Position.Y / MAX_WORLD_HEIGHT;
 
                 _spriteBatch.Draw(
                     renderingComponent.Texture,
@@ -94,11 +70,9 @@ public class SpriteRenderer
                     renderingComponent.Origin,
                     renderingComponent.Scale,
                     spriteEffect,
-                    layerDepth
+                    layer
                 );
             }
         }
-
-        _spriteBatch.End();
     }
 }

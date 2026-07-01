@@ -32,8 +32,13 @@ public class AttachedSystem : IUpdateSystem
 
             var trackedEntityPosition = trackedEntity.GetComponent<PositionComponent>();
             var attachedEntityPosition = entity.GetComponent<PositionComponent>();
-
             attachedEntityPosition.Position = trackedEntityPosition.Position + attachedComponent.Offset;
+
+            var attachedEntityRenderer = entity.GetComponentOptional<RenderingComponent>();
+            if (attachedEntityRenderer is not null)
+            {
+                attachedEntityRenderer.DepthHeightOverride = trackedEntityPosition.Position.Y;
+            }
         }
     }
 }

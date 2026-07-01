@@ -21,9 +21,8 @@ public class RenderingSystem : IRenderSystem, IRenderSystemOrder
 
     private readonly Effect _lightingEffect;
 
-    private readonly SpriteRenderer _spriteRenderer;
+    private readonly Renderer _renderer;
     private readonly TileRenderer _tileRenderer;
-    private readonly ParticleRenderer _particleRenderer;
 
     private readonly RenderTarget2D _sceneBuffer;
     private readonly RenderTarget2D _lightingBuffer;
@@ -46,9 +45,8 @@ public class RenderingSystem : IRenderSystem, IRenderSystemOrder
         LightSystem lightSystem,
         SpriteBatch spriteBatch,
         Helper helper,
-        SpriteRenderer spriteRenderer,
-        TileRenderer tileRenderer,
-        ParticleRenderer particleRenderer
+        Renderer renderer,
+        TileRenderer tileRenderer
     )
     {
         _graphicsDevice = graphicsDevice;
@@ -59,9 +57,8 @@ public class RenderingSystem : IRenderSystem, IRenderSystemOrder
         _spriteBatch = spriteBatch;
         _helper = helper;
 
-        _spriteRenderer = spriteRenderer;
+        _renderer = renderer;
         _tileRenderer = tileRenderer;
-        _particleRenderer = particleRenderer;
 
         _lightingEffect = _contentManager.Load<Effect>("Effects/LightingEffect");
 
@@ -128,8 +125,7 @@ public class RenderingSystem : IRenderSystem, IRenderSystemOrder
             {
                 _graphicsDevice.Clear(Color.Transparent);
                 _tileRenderer.RenderTiles();
-                _spriteRenderer.RenderSprites();
-                _particleRenderer.RenderParticles();
+                _renderer.Render();
             }
         );
     }

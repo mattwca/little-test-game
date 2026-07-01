@@ -54,9 +54,8 @@ public class LittleTestGame : Game
         _systemManager.Register(_systemManager.Construct<Helper>());
         _systemManager.Register(_systemManager.Construct<ShapeRenderer>());
         _systemManager.Register(_systemManager.Construct<TextRenderer>());
-        _systemManager.Register(_systemManager.Construct<SpriteRenderer>());
+        _systemManager.Register(_systemManager.Construct<Renderer>());
         _systemManager.Register(_systemManager.Construct<TileRenderer>());
-        _systemManager.Register(_systemManager.Construct<ParticleRenderer>());
 
         _systemManager
             .EntityManager.CreateEntity("camera")
@@ -73,39 +72,39 @@ public class LittleTestGame : Game
                     100,
                     Color.White,
                     new Vector2(0, 0),
-                    0,
                     1f
                 )
             );
 
-        _systemManager
-            .EntityManager.CreateEntity("light")
-            .AddComponent(new PositionComponent(new Vector2(150, 150), 32, 32))
-            .AddComponent(new LightComponent(Color.Gold, 100))
-            .AddComponent(new RenderingComponent(Content.Load<Texture2D>("light"), Color.White, castsShadow: false))
-            .AddComponent(new VisibilityComponent(offset: 50));
+        // _systemManager
+        //     .EntityManager.CreateEntity("light")
+        //     .AddComponent(new PositionComponent(new Vector2(150, 150), 32, 32))
+        //     .AddComponent(new LightComponent(Color.Gold, 100))
+        //     .AddComponent(new RenderingComponent(Content.Load<Texture2D>("light"), Color.White, castsShadow: false))
+        //     .AddComponent(new BoundingBoxComponent(new Vector2(4, 4), 24, 20))
+        //     .AddComponent(new VisibilityComponent(offset: 50));
 
-        _systemManager
-            .EntityManager.CreateEntity("light2")
-            .AddComponent(new PositionComponent(new Vector2(400, 250), 32, 32))
-            .AddComponent(new LightComponent(Color.Gold, 100))
-            .AddComponent(new RenderingComponent(Content.Load<Texture2D>("light"), Color.White, castsShadow: false))
-            .AddComponent(new VisibilityComponent(offset: 50));
+        // _systemManager
+        //     .EntityManager.CreateEntity("light2")
+        //     .AddComponent(new PositionComponent(new Vector2(400, 250), 32, 32))
+        //     .AddComponent(new LightComponent(Color.Gold, 100))
+        //     .AddComponent(new RenderingComponent(Content.Load<Texture2D>("light"), Color.White, castsShadow: false))
+        //     .AddComponent(new BoundingBoxComponent(Vector2.Zero, 32, 32))
+        //     .AddComponent(new VisibilityComponent(offset: 50));
 
-        _systemManager
-            .EntityManager.CreateEntity("light3")
-            .AddComponent(new PositionComponent(new Vector2(350, 50), 32, 32))
-            .AddComponent(new LightComponent(Color.Gold, 100))
-            .AddComponent(new RenderingComponent(Content.Load<Texture2D>("light"), Color.White, castsShadow: false))
-            .AddComponent(new VisibilityComponent(offset: 50));
+        // _systemManager
+        //     .EntityManager.CreateEntity("light3")
+        //     .AddComponent(new PositionComponent(new Vector2(350, 50), 32, 32))
+        //     .AddComponent(new LightComponent(Color.Gold, 100))
+        //     .AddComponent(new RenderingComponent(Content.Load<Texture2D>("light"), Color.White, castsShadow: false))
+        //     .AddComponent(new BoundingBoxComponent(Vector2.Zero, 32, 32))
+        //     .AddComponent(new VisibilityComponent(offset: 50));
 
         _systemManager
             .EntityManager.CreateEntity("player")
             .AddComponent(new PositionComponent(new Vector2(150, 50), 32, 32))
             .AddComponent(new HeightComponent())
-            .AddComponent(
-                new RenderingComponent(Content.Load<Texture2D>("player"), Color.White, layer: 2, castsShadow: true)
-            )
+            .AddComponent(new RenderingComponent(Content.Load<Texture2D>("player"), Color.White, castsShadow: true))
             .AddComponent(new PlayerComponent())
             .AddComponent(new VisibilityComponent())
             .AddComponent(new AnimationComponent("playerWalking", 30))
@@ -121,8 +120,6 @@ public class LittleTestGame : Game
                     Content.Load<Texture2D>("shadow"),
                     new Color(255, 255, 255, 128),
                     origin: new Vector2(16, 16),
-                    layer: 1,
-                    // scale: 1,
                     castsShadow: false
                 )
             );

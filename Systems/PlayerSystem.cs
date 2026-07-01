@@ -42,6 +42,7 @@ public class PlayerSystem : IUpdateSystem
         HandlePlayerMovement(playerEntity, gameTime);
         HandleOtherInput(playerEntity);
         HandlePlayerJumped(playerEntity);
+        HandlePlayerShoot(playerEntity);
 
         UpdatePlayerShadow(playerEntity);
     }
@@ -49,16 +50,14 @@ public class PlayerSystem : IUpdateSystem
     private void UpdatePlayerShadow(Entity playerEntity)
     {
         var playerShadowEntity = _entityManager.GetEntity("playerShadow");
-
-        var playerHeightComponent = playerEntity.GetComponent<HeightComponent>();
-        var playerShadowRendering = playerShadowEntity.GetComponent<RenderingComponent>();
-
-        playerShadowRendering.Scale = 0.1f + (0.1f / Math.Max(playerHeightComponent.Z / 20f, 0.25f));
-
-        if (playerHeightComponent.Grounded)
+        if (playerShadowEntity is null)
         {
             return;
         }
+
+        var playerShadowRendering = playerShadowEntity.GetComponent<RenderingComponent>();
+        var playerHeightComponent = playerEntity.GetComponent<HeightComponent>();
+        playerShadowRendering.Scale = 0.1f + (0.1f / Math.Max(playerHeightComponent.Z / 20f, 0.25f));
     }
 
     private void HandlePlayerJumped(Entity playerEntity)
@@ -74,11 +73,38 @@ public class PlayerSystem : IUpdateSystem
                 .AddComponent(new PositionComponent(playerPosition.Position + new Vector2(12, 32)))
                 .AddComponent(
                     new ParticleEmitterComponent(
-                        particleType: new ParticleTypeConfig("Particles/playerJump", CastsShadow: false),
+                        particleType: new ParticleTypeConfig("Particles/playerJump"),
                         spawnConfig: new ParticleSpawnConfig(5, 50f, 0.5f),
-                        colourConfig: new ParticleColourConfig(Color.LightGray, Color.DarkGray),
+                        colourConfig: new ParticleColourConfig(Color.White, Color.White),
                         new ParticleEmitterArc(-50, 50),
-                        emitterType: ParticleEmitterType.BURST
+                        emitterType: ParticleEmitterType.BURST,
+                        new ParticleRenderConfig(playerPosition.Position.Y)
+                    )
+                );
+        }
+    }
+
+    private void HandlePlayerShoot(Entity playerEntity)
+    {
+        var playerPosition = playerEntity.GetComponent<PositionComponent>();
+
+        if (_keyboardHandler.WasKeyPressed(Keys.Right))
+        {
+            _entityManager
+                .CreateEntity($"playerShootRight-{Guid.NewGuid()}")
+                .AddComponent(new AttachedComponent("player", Vector2.Zero))
+                .AddComponent(new PositionComponent(playerPosition.Position))
+                .AddComponent(
+                    new ParticleEmitterComponent(
+                        new ParticleTypeConfig(
+                            "Particles/bullet",
+                            false,
+                            new ParticleLightingConfig(ParticleLightingOption.EmitsLight, 500f)
+                        ),
+                        new ParticleSpawnConfig(10, Velocity: 150f, SpawnRate: 5f, LifespanSeconds: 3),
+                        new ParticleColourConfig(Color.White),
+                        new ParticleEmitterPoint(new Vector2(1, 0)),
+                        ParticleEmitterType.CONTINUOUS
                     )
                 );
         }

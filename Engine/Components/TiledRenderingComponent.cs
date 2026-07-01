@@ -15,11 +15,10 @@ public class TiledRenderingComponent : RenderingComponent
         int tilesY,
         Color colour = default,
         Vector2 offset = default,
-        int layer = 0,
         float scale = 1f,
         bool castsShadow = false
     )
-        : base(texture, colour, offset, Vector2.Zero, layer, scale, castsShadow)
+        : base(texture, colour, offset, Vector2.Zero, scale, castsShadow)
     {
         TileSize = tileSize;
         TilesX = tilesX;

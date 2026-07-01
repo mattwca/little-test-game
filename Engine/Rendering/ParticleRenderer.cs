@@ -1,8 +1,6 @@
-using System;
 using System.Linq;
 using Engine.Components;
 using Engine.ECS;
-using Engine.Utils;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -11,53 +9,37 @@ namespace Engine.Rendering;
 
 public class ParticleRenderer
 {
-    private readonly EntityManager _entityManager;
-    private readonly ContentManager _contentManager;
-    private readonly SpriteBatch _spriteBatch;
-    private readonly Helper _helper;
+    /// <summary>
+    /// Max world height for layer depth calcs
+    /// </summary>
+    private const int MAX_WORLD_HEIGHT = 1000;
 
-    public ParticleRenderer(
-        EntityManager entityManager,
-        ContentManager contentManager,
-        SpriteBatch spriteBatch,
-        Helper helper
-    )
+    private readonly ContentManager _contentManager;
+    private readonly EntityManager _entityManager;
+    private readonly SpriteBatch _spriteBatch;
+
+    public ParticleRenderer(ContentManager contentManager, EntityManager entityManager, SpriteBatch spriteBatch)
     {
-        _entityManager = entityManager;
         _contentManager = contentManager;
+        _entityManager = entityManager;
         _spriteBatch = spriteBatch;
-        _helper = helper;
     }
 
-    public void RenderParticles(bool onlyShadowCasters = false)
+    public void RenderParticles(bool shadowCastersOnly)
     {
-        var cameraTransform = _helper.GetCameraTransform();
-
-        _spriteBatch.Begin(
-            sortMode: SpriteSortMode.FrontToBack,
-            samplerState: SamplerState.PointClamp,
-            blendState: BlendState.AlphaBlend,
-            transformMatrix: cameraTransform
-        // effect: _spriteEffect
-        );
-
         var emitterEntities = _entityManager.GetEntitiesWithComponents(
             typeof(ParticleEmitterComponent),
             typeof(PositionComponent)
         );
 
-        if (onlyShadowCasters)
+        if (shadowCastersOnly)
         {
-            emitterEntities =
-            [
-                .. emitterEntities.Where(
-                    (entity) =>
-                    {
-                        var emitterComponent = entity.GetComponent<ParticleEmitterComponent>();
-                        return emitterComponent.ParticleType.CastsShadow;
-                    }
-                ),
-            ];
+            emitterEntities = emitterEntities
+                .Where(emitter =>
+                    emitter.GetComponent<ParticleEmitterComponent>()!.ParticleType?.LightingConfig?.LightingOption
+                    == ParticleLightingOption.CastsShadow
+                )
+                .ToList();
         }
 
         foreach (var emitter in emitterEntities)
@@ -74,19 +56,27 @@ public class ParticleRenderer
                     continue;
                 }
 
-                var worldPosition = emitterPosition.Position + particle.Position;
+                var depthZ = emitterComponent.RenderConfig?.OverrideDepthZ ?? emitterPosition.Position.Y;
+                var layer = depthZ / MAX_WORLD_HEIGHT;
 
                 var fadeOutValue = emitterComponent.ParticleType.FadeOut
                     ? (particle.Age / emitterComponent.SpawnConfig.LifespanSeconds * 128) / 128
                     : 128;
                 var fadeOutColour = new Color(fadeOutValue, fadeOutValue, fadeOutValue, fadeOutValue);
-
                 var particleColour = particle.Colour * fadeOutColour;
 
-                _spriteBatch.Draw(emitterTexture, worldPosition, particleColour);
+                _spriteBatch.Draw(
+                    emitterTexture,
+                    particle.Position,
+                    null,
+                    particleColour,
+                    0f,
+                    Vector2.Zero,
+                    1f,
+                    SpriteEffects.None,
+                    layer
+                );
             }
         }
-
-        _spriteBatch.End();
     }
 }

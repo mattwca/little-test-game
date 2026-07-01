@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Engine.Components;
@@ -10,17 +11,18 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Engine.Lighting;
 
-public class LightSystem : IRenderSystem, IUpdateSystem, IRenderSystemOrder
+public class LightSystem : IRenderSystem, IRenderSystemOrder
 {
     private readonly EntityManager _entityManager;
     private readonly ContentManager _contentManager;
     private readonly GraphicsDevice _graphicsDevice;
     private readonly SpriteBatch _spriteBatch;
-    private readonly SpriteRenderer _spriteRenderer;
-    private readonly ParticleRenderer _particleRenderer;
+    private readonly Renderer _renderer;
 
     private readonly RenderTarget2D _occluderTexture;
     private readonly Effect _shadowMapEffect;
+
+    private readonly Vector2 _lightPositionOffset = new Vector2(0, 0);
 
     public Dictionary<string, RenderTarget2D> ShadowMaps { get; }
     public int RenderOrder
@@ -33,16 +35,14 @@ public class LightSystem : IRenderSystem, IUpdateSystem, IRenderSystemOrder
         ContentManager contentManager,
         GraphicsDevice graphicsDevice,
         SpriteBatch spriteBatch,
-        SpriteRenderer spriteRenderer,
-        ParticleRenderer particleRenderer
+        Renderer renderer
     )
     {
         _entityManager = entityManager;
         _contentManager = contentManager;
         _graphicsDevice = graphicsDevice;
         _spriteBatch = spriteBatch;
-        _spriteRenderer = spriteRenderer;
-        _particleRenderer = particleRenderer;
+        _renderer = renderer;
 
         ShadowMaps = new Dictionary<string, RenderTarget2D>();
 
@@ -55,6 +55,16 @@ public class LightSystem : IRenderSystem, IUpdateSystem, IRenderSystemOrder
         _shadowMapEffect = _contentManager.Load<Effect>("Effects/ShadowMapEffect");
     }
 
+    // public Entity[] GetVisibleLights()
+    // {
+    //     var lights = _entityManager.GetEntitiesWithComponents(
+    //         typeof(LightComponent),
+    //         typeof(PositionComponent),
+    //         typeof(VisibilityComponent)
+    //     );
+    //     return lights.Where((light) => light.GetComponent<VisibilityComponent>().IsVisible).ToArray();
+    // }
+
     public Entity[] GetVisibleLights()
     {
         var lights = _entityManager.GetEntitiesWithComponents(
@@ -62,7 +72,57 @@ public class LightSystem : IRenderSystem, IUpdateSystem, IRenderSystemOrder
             typeof(PositionComponent),
             typeof(VisibilityComponent)
         );
-        return lights.Where((light) => light.GetComponent<VisibilityComponent>().IsVisible).ToArray();
+
+        var particleEntities = _entityManager
+            .GetEntitiesWithComponents(typeof(ParticleEmitterComponent), typeof(PositionComponent))
+            .Where(
+                (emitter) =>
+                {
+                    var emitterComponent = emitter.GetComponent<ParticleEmitterComponent>();
+                    return emitterComponent.Enabled
+                        && emitterComponent.ParticleType.LightingConfig?.LightingOption
+                            == ParticleLightingOption.EmitsLight;
+                }
+            )
+            .SelectMany(
+                (emitter) =>
+                {
+                    var emitterComponent = emitter.GetComponent<ParticleEmitterComponent>();
+                    var emitterPosition = emitter.GetComponent<PositionComponent>();
+
+                    var particleIndex = 0;
+                    var particleEntities = emitterComponent.Particles.Aggregate(
+                        new List<Entity>(),
+                        (prev, particle) =>
+                        {
+                            if (particle.Age <= 0f)
+                            {
+                                particleIndex++;
+                                return prev;
+                            }
+
+                            var particleId = $"{emitter.Id}-particle:{particleIndex}";
+                            var positionComponent = new PositionComponent(particle.Position);
+                            var lightComponent = new LightComponent(
+                                particle.Colour,
+                                radius: emitterComponent.ParticleType.LightingConfig?.LightRadius ?? 50f
+                            );
+
+                            var particleEntity = new Entity(particleId);
+                            particleEntity.AddComponent(positionComponent).AddComponent(lightComponent);
+
+                            particleIndex++;
+
+                            return [.. prev, particleEntity];
+                        }
+                    );
+
+                    return particleEntities;
+                }
+            )
+            .ToList();
+
+        return [.. lights, .. particleEntities];
     }
 
     public void Draw(GameTime gameTime)
@@ -80,17 +140,6 @@ public class LightSystem : IRenderSystem, IUpdateSystem, IRenderSystemOrder
         }
     }
 
-    public void Update(GameTime gameTime)
-    {
-        // var lightEntity = _entityManager.GetEntityWithComponent<LightComponent>()!;
-        // var lightComponent = lightEntity.GetComponent<LightComponent>();
-        // var renderingComponent = lightEntity.GetComponent<RenderingComponent>();
-
-        // var colour = _colourGenerator.GetCyclingColor(deltaTime);
-        // lightComponent.Colour = colour;
-        // renderingComponent.Colour = colour;
-    }
-
     private void RenderOccluders()
     {
         _graphicsDevice.WithRenderTarget(
@@ -98,13 +147,7 @@ public class LightSystem : IRenderSystem, IUpdateSystem, IRenderSystemOrder
             () =>
             {
                 _graphicsDevice.Clear(Color.Transparent);
-                _spriteRenderer.RenderSprites(
-                    (renderComponent) =>
-                    {
-                        return renderComponent.CastsShadow;
-                    }
-                );
-                _particleRenderer.RenderParticles(onlyShadowCasters: true);
+                _renderer.Render(true);
             }
         );
     }
@@ -116,7 +159,7 @@ public class LightSystem : IRenderSystem, IUpdateSystem, IRenderSystemOrder
 
         _shadowMapEffect
             .Parameters["LightPosition"]
-            .SetValue(Vector2.Transform(lightPosition.Centre, cameraComponent!.Transform));
+            .SetValue(Vector2.Transform(lightPosition.Centre + _lightPositionOffset, cameraComponent!.Transform));
         _shadowMapEffect
             .Parameters["Resolution"]
             .SetValue(new Vector2(_graphicsDevice.Viewport.Width, _graphicsDevice.Viewport.Height));

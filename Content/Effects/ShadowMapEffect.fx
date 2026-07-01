@@ -7,13 +7,13 @@ float LightRadius : register(c2);
 /**
  * The maximum number of steps (samples) to take along a ray when looking for an occluder.
  */
-static const int STEPS = 400;
+static const int STEPS = 800;
 
 /**
  * An offset which specifies the minimum distance from which to begin casting the ray. Ensures that a light source
  * doesn't self-shadow.
  */
-static const float RAY_OFFSET = 0;//0.08;
+static const float RAY_OFFSET = 0; // 0.005;
 
 /**
  * A shader which generates a shadow map.

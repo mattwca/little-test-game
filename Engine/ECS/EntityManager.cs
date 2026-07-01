@@ -28,6 +28,8 @@ public class EntityManager
 
     public Entity? GetEntity(string id) => Entities.Find(entity => entity.Id == id);
 
+    public Entity CreateOrGetEntity(string id) => HasEntity(id) ? GetEntity(id)! : CreateEntity(id);
+
     public Entity? GetEntityWithComponent<T>()
         where T : IComponent => Entities.Find((entity) => entity.HasComponent<T>());
 

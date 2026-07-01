@@ -10,35 +10,35 @@ public class RenderingComponent : IComponent
     public Color Colour { get; set; }
     public Vector2 Offset { get; set; }
     public Vector2 Origin { get; set; }
-    public int Layer { get; }
     public float Scale { get; set; }
     public bool FlipX { get; set; }
     public bool FlipY { get; set; }
     public bool CastsShadow { get; set; }
     public Rectangle? SourceRectangle { get; set; }
+    public float? DepthHeightOverride { get; set; }
 
     public RenderingComponent(
         Texture2D texture,
         Color colour = default,
         Vector2 offset = default,
         Vector2 origin = default,
-        int layer = 0,
         float scale = 1f,
         bool flipX = false,
         bool flipY = false,
         bool castsShadow = true,
-        Rectangle? sourceRectangle = null
+        Rectangle? sourceRectangle = null,
+        float? depthHeightOverride = null
     )
     {
         Texture = texture;
         Colour = colour;
         Offset = offset;
         Origin = origin;
-        Layer = layer;
         Scale = scale;
         FlipX = flipX;
         FlipY = flipY;
         CastsShadow = castsShadow;
         SourceRectangle = sourceRectangle;
+        DepthHeightOverride = depthHeightOverride;
     }
 }
