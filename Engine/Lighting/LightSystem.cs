@@ -103,9 +103,24 @@ public class LightSystem : IRenderSystem, IRenderSystemOrder
 
                             var particleId = $"{emitter.Id}-particle:{particleIndex}";
                             var positionComponent = new PositionComponent(particle.Position);
+
+                            var (
+                                _,
+                                Intensity,
+                                Radius,
+                                AttenuationConstant,
+                                AttenuationLinear,
+                                AttenuationQuadratic,
+                                WindowExponent
+                            ) = emitterComponent.ParticleType.LightingConfig!;
+
                             var lightComponent = new LightComponent(
-                                particle.Colour,
-                                radius: emitterComponent.ParticleType.LightingConfig?.LightRadius ?? 50f
+                                colour: particle.Colour,
+                                intensity: Intensity,
+                                radius: Radius,
+                                attenuationConstant: AttenuationConstant,
+                                attenuationLinear: AttenuationLinear,
+                                attenuationQuadratic: AttenuationQuadratic
                             );
 
                             var particleEntity = new Entity(particleId);

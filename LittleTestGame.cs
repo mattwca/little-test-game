@@ -2,8 +2,9 @@
 using Engine.Animation;
 using Engine.Components;
 using Engine.ECS;
+using Engine.Events;
 using Engine.Lighting;
-using Engine.Particles;
+using Engine.Physics;
 using Engine.Rendering;
 using Engine.Systems;
 using Engine.Utils;
@@ -49,7 +50,8 @@ public class LittleTestGame : Game
             .Register(GraphicsDevice)
             .Register(Content)
             .Register(animationManager)
-            .Register(new FPSCounter());
+            .Register(new FPSCounter())
+            .Register(new EventBus());
 
         _systemManager.Register(_systemManager.Construct<Helper>());
         _systemManager.Register(_systemManager.Construct<ShapeRenderer>());
@@ -76,29 +78,13 @@ public class LittleTestGame : Game
                 )
             );
 
-        // _systemManager
-        //     .EntityManager.CreateEntity("light")
-        //     .AddComponent(new PositionComponent(new Vector2(150, 150), 32, 32))
-        //     .AddComponent(new LightComponent(Color.Gold, 100))
-        //     .AddComponent(new RenderingComponent(Content.Load<Texture2D>("light"), Color.White, castsShadow: false))
-        //     .AddComponent(new BoundingBoxComponent(new Vector2(4, 4), 24, 20))
-        //     .AddComponent(new VisibilityComponent(offset: 50));
-
-        // _systemManager
-        //     .EntityManager.CreateEntity("light2")
-        //     .AddComponent(new PositionComponent(new Vector2(400, 250), 32, 32))
-        //     .AddComponent(new LightComponent(Color.Gold, 100))
-        //     .AddComponent(new RenderingComponent(Content.Load<Texture2D>("light"), Color.White, castsShadow: false))
-        //     .AddComponent(new BoundingBoxComponent(Vector2.Zero, 32, 32))
-        //     .AddComponent(new VisibilityComponent(offset: 50));
-
-        // _systemManager
-        //     .EntityManager.CreateEntity("light3")
-        //     .AddComponent(new PositionComponent(new Vector2(350, 50), 32, 32))
-        //     .AddComponent(new LightComponent(Color.Gold, 100))
-        //     .AddComponent(new RenderingComponent(Content.Load<Texture2D>("light"), Color.White, castsShadow: false))
-        //     .AddComponent(new BoundingBoxComponent(Vector2.Zero, 32, 32))
-        //     .AddComponent(new VisibilityComponent(offset: 50));
+        _systemManager
+            .EntityManager.CreateEntity("light")
+            .AddComponent(new PositionComponent(new Vector2(150, 150), 32, 32))
+            .AddComponent(new LightComponent(Color.Gold, 1.0f, 500f))
+            .AddComponent(new RenderingComponent(Content.Load<Texture2D>("light"), Color.White, castsShadow: false))
+            .AddComponent(new BoundingBoxComponent(new Vector2(4, 4), 24, 20))
+            .AddComponent(new VisibilityComponent(offset: 50));
 
         _systemManager
             .EntityManager.CreateEntity("player")
@@ -143,18 +129,24 @@ public class LittleTestGame : Game
             )
             .AddComponent(new PositionComponent(new Vector2(20, 50)));
 
-        _systemManager.AddSystem<VisibilitySystem>();
         _systemManager.AddSystem<PlayerSystem>();
-        _systemManager.AddSystem<AttachedSystem>();
         _systemManager.AddSystem<MapSystem>();
-        _systemManager.AddSystem<PhysicsSystem>();
+        _systemManager.AddSystem<DodgeSystem>();
+
+        _systemManager.AddSystem<VisibilitySystem>();
+        _systemManager.AddSystem<MovementSystem>();
+        _systemManager.AddSystem<CameraSystem>();
         _systemManager.AddSystem<GravitySystem>();
+        _systemManager.AddSystem<CollisionResolutionSystem>();
+        _systemManager.AddSystem<AttachedSystem>();
+
         _systemManager.AddSystem<AnimationSystem>();
         _systemManager.AddSystem<LightSystem>();
         _systemManager.AddSystem<RenderingSystem>();
         _systemManager.AddSystem<ParticleEmitterSystem>();
+
         _systemManager.AddSystem<DebugTextSystem>();
-        _systemManager.AddSystem<CameraSystem>();
+        _systemManager.AddSystem<EventSystem>();
     }
 
     protected override void Update(GameTime gameTime)

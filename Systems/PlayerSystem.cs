@@ -1,12 +1,16 @@
 using System;
+using System.Linq;
 using Components;
 using Engine.Components;
 using Engine.ECS;
+using Engine.Events;
 using Engine.Particles;
+using Engine.Physics;
+using Engine.Systems;
 using Engine.Utils;
+using Events;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
-using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
 namespace Systems;
@@ -16,17 +20,16 @@ public class PlayerSystem : IUpdateSystem
     private readonly StateManager _stateManager;
     private readonly EntityManager _entityManager;
     private readonly KeyboardHandler _keyboardHandler;
-    private readonly Texture2D _bulletTexture;
+    private readonly EventBus _eventBus;
 
     private const float JUMP_IMPULSE = 200f;
 
-    public PlayerSystem(StateManager stateManager, EntityManager entityManager, ContentManager contentManager)
+    public PlayerSystem(StateManager stateManager, EntityManager entityManager, EventBus eventBus)
     {
         _stateManager = stateManager;
         _entityManager = entityManager;
         _keyboardHandler = new KeyboardHandler();
-
-        _bulletTexture = contentManager.Load<Texture2D>("bullet");
+        _eventBus = eventBus;
     }
 
     public void Update(GameTime gameTime)
@@ -70,13 +73,13 @@ public class PlayerSystem : IUpdateSystem
             var newEntityId = $"playerJumpParticles-{Guid.NewGuid()}";
             _entityManager
                 .CreateEntity(newEntityId)
-                .AddComponent(new PositionComponent(playerPosition.Position + new Vector2(12, 32)))
+                .AddComponent(new PositionComponent(playerPosition.Position + new Vector2(16, 32)))
                 .AddComponent(
                     new ParticleEmitterComponent(
-                        particleType: new ParticleTypeConfig("Particles/playerJump"),
+                        particleType: new ParticleTypeConfig("Particles/playerJump", 8, 8),
                         spawnConfig: new ParticleSpawnConfig(5, 50f, 0.5f),
                         colourConfig: new ParticleColourConfig(Color.White, Color.White),
-                        new ParticleEmitterArc(-50, 50),
+                        new ParticleEmitterCircle(), // (-50, 50),
                         emitterType: ParticleEmitterType.BURST,
                         new ParticleRenderConfig(playerPosition.Position.Y)
                     )
@@ -98,11 +101,21 @@ public class PlayerSystem : IUpdateSystem
                     new ParticleEmitterComponent(
                         new ParticleTypeConfig(
                             "Particles/bullet",
+                            8,
+                            8,
                             false,
-                            new ParticleLightingConfig(ParticleLightingOption.EmitsLight, 500f)
+                            new ParticleLightingConfig(
+                                ParticleLightingOption.EmitsLight,
+                                1f,
+                                500f,
+                                5f,
+                                0.95f,
+                                0.9f,
+                                10f
+                            )
                         ),
                         new ParticleSpawnConfig(10, Velocity: 150f, SpawnRate: 5f, LifespanSeconds: 3),
-                        new ParticleColourConfig(Color.White),
+                        new ParticleColourConfig(Color.Red),
                         new ParticleEmitterPoint(new Vector2(1, 0)),
                         ParticleEmitterType.CONTINUOUS
                     )
@@ -126,7 +139,6 @@ public class PlayerSystem : IUpdateSystem
     private void HandlePlayerMovement(Entity playerEntity, GameTime gameTime)
     {
         var playerComponent = playerEntity.GetComponent<PlayerComponent>();
-        var positionComponent = playerEntity.GetComponent<PositionComponent>();
         var animationComponent = playerEntity.GetComponent<AnimationComponent>();
         var renderingComponent = playerEntity.GetComponent<RenderingComponent>();
         var heightComponent = playerEntity.GetComponent<HeightComponent>();
@@ -164,7 +176,14 @@ public class PlayerSystem : IUpdateSystem
             heightComponent.ZVelocity = JUMP_IMPULSE;
         }
 
+        if (_keyboardHandler.WasKeyPressed(Keys.LeftShift))
+        {
+            _eventBus.Publish(new DodgeEvent(playerEntity, movementVector, 0.25f, 0.1f));
+        }
+
         animationComponent.Enabled = movementVector != Vector2.Zero;
-        positionComponent.Position += movementVector * (float)gameTime.ElapsedGameTime.TotalSeconds * 100;
+        playerEntity.ReplaceComponent(
+            new VelocityComponent(movementVector * (float)gameTime.ElapsedGameTime.TotalSeconds * 100)
+        );
     }
 }

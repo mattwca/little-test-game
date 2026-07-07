@@ -3,6 +3,7 @@ using System.Linq;
 using Engine.Components;
 using Engine.ECS;
 using Engine.Particles;
+using Engine.Utils;
 using Microsoft.Xna.Framework;
 
 namespace Engine.Systems;
@@ -49,8 +50,8 @@ public class ParticleEmitterSystem : IUpdateSystem
         }
         else if (particleEmitterComponent.EmitterShape is ParticleEmitterArc arc)
         {
-            var spawnAngle = MathHelper.ToRadians(_random.Next(arc.MinAngle, arc.MaxAngle));
-            var spawnDirection = new Vector2(MathF.Sin(spawnAngle), -MathF.Cos(spawnAngle));
+            var spawnAngle = MathHelper.ToRadians(_random.NextFloat(arc.MinAngle, arc.MaxAngle));
+            var spawnDirection = new Vector2(MathF.Sin(spawnAngle), MathF.Cos(spawnAngle));
 
             return (Vector2.Zero, spawnDirection);
         }
@@ -87,9 +88,6 @@ public class ParticleEmitterSystem : IUpdateSystem
             return;
         }
 
-        // var rotation = 0f;
-        // if (emitter.RotationBounds is not null) { }
-
         var updatedColour = emitter.ColourConfig.StartColour;
         if (emitter.ColourConfig.EndColour is not null)
         {
@@ -119,41 +117,43 @@ public class ParticleEmitterSystem : IUpdateSystem
         if (!emitterComponent.Enabled)
         {
             emitterComponent.HasFired = false;
-            return;
         }
 
-        if (emitterComponent.EmitterType == ParticleEmitterType.CONTINUOUS)
+        if (emitterComponent.Enabled)
         {
-            if (emitterComponent.SpawnConfig.SpawnRate is null)
+            if (emitterComponent.EmitterType == ParticleEmitterType.CONTINUOUS)
             {
-                throw new Exception("Continuous emitter must have a spawn rate");
-            }
-
-            emitterComponent.Accumulator += emitterComponent.SpawnConfig.SpawnRate.Value * dt;
-            while (emitterComponent.Accumulator >= 1f)
-            {
-                SpawnParticle(emitterComponent, emitterPosition);
-                emitterComponent.Accumulator -= 1f;
-            }
-        }
-        else if (emitterComponent.EmitterType == ParticleEmitterType.BURST)
-        {
-            if (!emitterComponent.HasFired)
-            {
-                for (var i = 0; i < emitterComponent.Particles.Length; i++)
+                if (emitterComponent.SpawnConfig.SpawnRate is null)
                 {
-                    SpawnParticle(emitterComponent, emitterPosition);
+                    throw new Exception("Continuous emitter must have a spawn rate");
                 }
 
-                emitterComponent.HasFired = true;
-            }
-            else
-            {
-                // Check whether all particles have died - if they have, remove the emitter.
-                if (emitterComponent.Particles.All((particle) => particle.Age <= 0))
+                emitterComponent.Accumulator += emitterComponent.SpawnConfig.SpawnRate.Value * dt;
+                while (emitterComponent.Accumulator >= 1f)
                 {
-                    _cleanupSystem.MarkForCleanup(particleEmitterEntity.Id);
-                    return;
+                    SpawnParticle(emitterComponent, emitterPosition);
+                    emitterComponent.Accumulator -= 1f;
+                }
+            }
+            else if (emitterComponent.EmitterType == ParticleEmitterType.BURST)
+            {
+                if (!emitterComponent.HasFired)
+                {
+                    for (var i = 0; i < emitterComponent.Particles.Length; i++)
+                    {
+                        SpawnParticle(emitterComponent, emitterPosition);
+                    }
+
+                    emitterComponent.HasFired = true;
+                }
+                else
+                {
+                    // Check whether all particles have died - if they have, remove the emitter.
+                    if (emitterComponent.Particles.All((particle) => particle.Age <= 0))
+                    {
+                        _cleanupSystem.MarkForCleanup(particleEmitterEntity.Id);
+                        return;
+                    }
                 }
             }
         }

@@ -36,11 +36,12 @@ public class Entity
         return this;
     }
 
-    public Entity AddComponents<T>(List<T> components)
-        where T : IComponent
+    public Entity AddComponents(List<IComponent> components)
     {
-        var componentType = typeof(T);
-        _components[componentType] = components.Cast<IComponent>().ToList();
+        foreach (var component in components)
+        {
+            AddComponent(component);
+        }
 
         return this;
     }

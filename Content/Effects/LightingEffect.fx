@@ -5,6 +5,9 @@ float2 LightPosition : register(c0);
 float4 LightColour : register(c1);
 float LightRadius : register(c2);
 float2 ScreenSize : register(c3);
+float Intensity : register(c4);
+float3 Attenuation : register(c5);
+float WindowExponent : register(c6);
 
 static const float4 UNLIT_PIXEL = float4(0, 0, 0, 0);
 
@@ -58,9 +61,9 @@ float CalculateFalloff(float distanceToLight)
     // Each lighting layer is summed with the last, so the brightness of a given pixel is the accumulation of each
     // light source's contribution.
     float normalisedDistance = distanceToLight / LightRadius;
-    float attenuation = 1.0 / (1.0 + 25.0 * normalisedDistance * normalisedDistance);
+    float attenuation = 1.0 / (Attenuation.x + Attenuation.y * normalisedDistance + Attenuation.z * normalisedDistance * normalisedDistance);
 
-    float window = saturate(1.0 - normalisedDistance * normalisedDistance * normalisedDistance * normalisedDistance);
+    float window = saturate(1.0 - pow(normalisedDistance, WindowExponent));
     window = window * window;
 
     return attenuation * window;
@@ -117,7 +120,7 @@ float4 LightingPixelShader(float2 texCoord : TEXCOORD0) : COLOR0
     float visibility = CalculateNearbyVisibilityWeight(uv, distanceToLight);
     float falloff = CalculateFalloff(distanceToLight);
 
-    return LightColour * falloff * visibility;
+    return LightColour * falloff * visibility * Intensity;
 }
 
 technique SpriteBatch { 

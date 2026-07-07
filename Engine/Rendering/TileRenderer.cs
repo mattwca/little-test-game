@@ -6,12 +6,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Engine.Rendering;
 
-public class TileRenderer(
-    EntityManager entityManager,
-    GraphicsDevice graphicsDevice,
-    SpriteBatch spriteBatch,
-    Helper helper
-)
+public class TileRenderer(EntityManager entityManager, SpriteBatch spriteBatch, Helper helper)
 {
     private readonly EntityManager _entityManager = entityManager;
     private readonly SpriteBatch _spriteBatch = spriteBatch;

@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using Engine.Components;
 using Engine.ECS;
@@ -27,10 +28,19 @@ public class ParticleRenderer
 
     public void RenderParticles(bool shadowCastersOnly)
     {
-        var emitterEntities = _entityManager.GetEntitiesWithComponents(
-            typeof(ParticleEmitterComponent),
-            typeof(PositionComponent)
-        );
+        var emitterEntities = _entityManager
+            .Entities.Where(
+                (entity) =>
+                {
+                    var hasComponents = entity.HasComponents(
+                        typeof(ParticleEmitterComponent),
+                        typeof(PositionComponent)
+                    );
+
+                    return hasComponents;
+                }
+            )
+            .ToList();
 
         if (shadowCastersOnly)
         {
@@ -71,7 +81,7 @@ public class ParticleRenderer
                     null,
                     particleColour,
                     0f,
-                    Vector2.Zero,
+                    new Vector2(emitterComponent.ParticleType.Width / 2f, emitterComponent.ParticleType.Height / 2f),
                     1f,
                     SpriteEffects.None,
                     layer

@@ -30,6 +30,20 @@ public class EntityManager
 
     public Entity CreateOrGetEntity(string id) => HasEntity(id) ? GetEntity(id)! : CreateEntity(id);
 
+    public Entity CreateOrGetEntity(string id, Action<Entity> setup)
+    {
+        if (HasEntity(id))
+        {
+            return GetEntity(id)!;
+        }
+
+        var entity = new Entity(id);
+        setup(entity);
+
+        AddEntity(entity);
+        return entity;
+    }
+
     public Entity? GetEntityWithComponent<T>()
         where T : IComponent => Entities.Find((entity) => entity.HasComponent<T>());
 

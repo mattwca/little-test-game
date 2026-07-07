@@ -1,9 +1,7 @@
 using System;
-
 using Engine.Animation;
 using Engine.Components;
 using Engine.ECS;
-
 using Microsoft.Xna.Framework;
 
 namespace Engine.Systems;

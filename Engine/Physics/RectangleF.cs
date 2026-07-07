@@ -1,16 +1,15 @@
 using System;
-
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Content;
 
 namespace Engine.Physics;
 
-public struct RectangleF(float x, float y, float width, float height)
+public struct RectangleF(float x, float y, float width, float height, string? entityId = null)
 {
     public float X { get; set; } = x;
     public float Y { get; set; } = y;
     public float Width { get; set; } = width;
     public float Height { get; set; } = height;
+    public string? EntityId { get; set; } = entityId;
 
     public readonly float Left => X;
     public readonly float Right => X + Width;

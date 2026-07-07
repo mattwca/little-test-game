@@ -13,7 +13,7 @@ static const int STEPS = 800;
  * An offset which specifies the minimum distance from which to begin casting the ray. Ensures that a light source
  * doesn't self-shadow.
  */
-static const float RAY_OFFSET = 0; // 0.005;
+static const float RAY_OFFSET = 0.005;
 
 /**
  * A shader which generates a shadow map.

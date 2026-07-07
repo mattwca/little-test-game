@@ -26,10 +26,20 @@ public enum ParticleLightingOption
     EmitsLight,
 }
 
-public record ParticleLightingConfig(ParticleLightingOption LightingOption, float? LightRadius = null);
+public record ParticleLightingConfig(
+    ParticleLightingOption LightingOption,
+    float Intensity = 1f,
+    float Radius = 50f,
+    float AttenuationConstant = 1f,
+    float AttenuationLinear = 0f,
+    float AttenuationQuadratic = 25f,
+    float WindowExponent = 4f
+);
 
 public record ParticleTypeConfig(
     string ParticleTexture,
+    int Width,
+    int Height,
     bool FadeOut = true,
     ParticleLightingConfig? LightingConfig = null
 );
@@ -53,7 +63,8 @@ public class ParticleEmitterComponent(
     IParticleEmitterShape emitterShape,
     ParticleEmitterType emitterType = ParticleEmitterType.CONTINUOUS,
     ParticleRenderConfig? renderConfig = null,
-    bool enabled = true
+    bool enabled = true,
+    bool removeEntityAfterParticlesDead = false
 ) : IComponent
 {
     public ParticleTypeConfig ParticleType { get; set; } = particleType;
@@ -64,6 +75,7 @@ public class ParticleEmitterComponent(
     public ParticleRenderConfig RenderConfig { get; set; } = renderConfig;
     public Particle[] Particles { get; } = new Particle[spawnConfig.ParticleCount];
     public bool Enabled { get; set; } = enabled;
+    public bool RemoveEntityAfterParticlesDead { get; set; } = removeEntityAfterParticlesDead;
 
     /// <summary>
     /// (Internal state) Spawn accumulator.

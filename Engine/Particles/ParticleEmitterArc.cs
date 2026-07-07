@@ -1,7 +1,7 @@
 namespace Engine.Particles;
 
-public class ParticleEmitterArc(int minAngle, int maxAngle) : IParticleEmitterShape
+public class ParticleEmitterArc(float minAngle, float maxAngle) : IParticleEmitterShape
 {
-    public int MinAngle { get; set; } = minAngle;
-    public int MaxAngle { get; set; } = maxAngle;
+    public float MinAngle { get; set; } = minAngle;
+    public float MaxAngle { get; set; } = maxAngle;
 }

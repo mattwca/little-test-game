@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using Engine.Components;
 using Engine.ECS;
+using Engine.Events;
 using Engine.Physics;
 using Engine.Rendering;
 using Engine.Utils;
@@ -12,31 +14,33 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Engine.Systems;
 
-public class PhysicsSystem : IUpdateSystem, IRenderSystem
+public class CollisionResolutionSystem : IUpdateSystem, IRenderSystem
 {
     private readonly SpriteBatch _spriteBatch;
     private readonly StateManager _stateManager;
     private readonly EntityManager _entityManager;
     private readonly ShapeRenderer _shapeRenderer;
-    private readonly List<RectangleF> _intersectResults;
+    private readonly EventBus _eventBus;
 
     private bool _isUpdatingQuadTree;
     private volatile QuadTree _quadTree;
 
-    public PhysicsSystem(
+    public CollisionResolutionSystem(
         SpriteBatch spriteBatch,
         StateManager stateManager,
         EntityManager entityManager,
-        ShapeRenderer shapeRenderer
+        ShapeRenderer shapeRenderer,
+        EventBus eventBus
     )
     {
         _spriteBatch = spriteBatch;
         _stateManager = stateManager;
         _entityManager = entityManager;
         _shapeRenderer = shapeRenderer;
+        _eventBus = eventBus;
 
         _quadTree = new QuadTree(800, 600);
-        _intersectResults = new List<RectangleF>();
+        _isUpdatingQuadTree = false;
 
         BuildQuadTree();
     }
@@ -87,11 +91,6 @@ public class PhysicsSystem : IUpdateSystem, IRenderSystem
             }
         }
 
-        foreach (var intersectResult in _intersectResults)
-        {
-            _shapeRenderer.RenderSquare(intersectResult.ToRectangle(), Color.Green);
-        }
-
         _spriteBatch.End();
     }
 
@@ -100,17 +99,20 @@ public class PhysicsSystem : IUpdateSystem, IRenderSystem
         BuildQuadTree();
 
         var dynamicBoundingEntities = _entityManager.Entities.Where(entity =>
-            entity.HasComponent<PositionComponent>()
-            && entity.HasComponent<BoundingBoxComponent>()
+            entity.HasComponents(typeof(PositionComponent), typeof(VelocityComponent), typeof(BoundingBoxComponent))
             && !entity.GetComponent<BoundingBoxComponent>().IsStatic
         );
-
-        _intersectResults.Clear();
 
         foreach (var entity in dynamicBoundingEntities)
         {
             var positionComponent = entity.GetComponent<PositionComponent>()!;
             var boundingBoxComponent = entity.GetComponent<BoundingBoxComponent>()!;
+            var velocityComponent = entity.GetComponent<VelocityComponent>();
+
+            var delta = velocityComponent.Velocity * (float)gameTime.ElapsedGameTime.TotalSeconds * 100;
+
+            // X pass
+            positionComponent.Position += new Vector2(delta.X, 0);
 
             var boundingRect = GetBoundingRectangleForComponents(positionComponent, boundingBoxComponent);
             var intersectors = _quadTree.GetIntersectors(boundingRect);
@@ -122,18 +124,36 @@ public class PhysicsSystem : IUpdateSystem, IRenderSystem
 
                 var intersectionDirection = entityCentre - intersectorCentre;
                 var overlapX = (boundingRect.Width + intersector.Width) / 2f - Math.Abs(intersectionDirection.X);
+
+                var normal = new Vector2(Math.Sign(intersectionDirection.X), 0);
+                positionComponent.Position += normal * overlapX;
+
+                velocityComponent.Velocity = new Vector2(0, velocityComponent.Velocity.Y);
+                boundingRect = GetBoundingRectangleForComponents(positionComponent, boundingBoxComponent);
+                _eventBus.Publish(new CollisionEvent(entity.Id, intersector.EntityId!, Vector2.Zero, normal, overlapX));
+            }
+
+            // Y pass
+            positionComponent.Position += new Vector2(0, delta.Y);
+
+            boundingRect = GetBoundingRectangleForComponents(positionComponent, boundingBoxComponent);
+            intersectors = _quadTree.GetIntersectors(boundingRect);
+
+            foreach (var intersector in intersectors)
+            {
+                var entityCentre = boundingRect.Centre;
+                var intersectorCentre = intersector.Centre;
+
+                var intersectionDirection = entityCentre - intersectorCentre;
                 var overlapY = (boundingRect.Height + intersector.Height) / 2f - Math.Abs(intersectionDirection.Y);
 
-                if (overlapX < overlapY)
-                {
-                    positionComponent.Position += new Vector2(Math.Sign(intersectionDirection.X) * overlapX, 0);
-                }
-                else
-                {
-                    positionComponent.Position += new Vector2(0, Math.Sign(intersectionDirection.Y) * overlapY);
-                }
+                var normal = new Vector2(0f, Math.Sign(intersectionDirection.Y));
+                positionComponent.Position += normal * overlapY;
+                velocityComponent.Velocity = new Vector2(velocityComponent.Velocity.X, 0);
 
                 boundingRect = GetBoundingRectangleForComponents(positionComponent, boundingBoxComponent);
+
+                _eventBus.Publish(new CollisionEvent(entity.Id, intersector.EntityId!, Vector2.Zero, normal, overlapY));
             }
         }
     }
@@ -156,8 +176,6 @@ public class PhysicsSystem : IUpdateSystem, IRenderSystem
 
         _isUpdatingQuadTree = true;
 
-        // var quadTree = await Task.Run(() =>
-        // {
         var boundingBoxEntities = _entityManager.GetEntitiesWithComponents(
             typeof(BoundingBoxComponent),
             typeof(PositionComponent)
@@ -178,8 +196,6 @@ public class PhysicsSystem : IUpdateSystem, IRenderSystem
                 newQuadTree.AddIntersector(bbRect);
             }
         }
-        // return newQuadTree;
-        // });
 
         _isUpdatingQuadTree = false;
         _quadTree = newQuadTree;

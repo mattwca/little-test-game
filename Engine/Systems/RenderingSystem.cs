@@ -175,6 +175,17 @@ public class RenderingSystem : IRenderSystem, IRenderSystemOrder
         _lightingEffect.Parameters["LightColour"].SetValue(lightComponent.Colour.ToVector4());
         _lightingEffect.Parameters["LightRadius"].SetValue(lightComponent.Radius / _graphicsDevice.Viewport.Height);
         _lightingEffect.Parameters["ScreenSize"].SetValue(screenSize);
+        _lightingEffect.Parameters["Intensity"].SetValue(lightComponent.Intensity);
+        _lightingEffect
+            .Parameters["Attenuation"]
+            .SetValue(
+                new Vector3(
+                    lightComponent.AttenuationConstant,
+                    lightComponent.AttenuationLinear,
+                    lightComponent.AttenuationQuadratic
+                )
+            );
+        _lightingEffect.Parameters["WindowExponent"].SetValue(lightComponent.WindowExponent);
         _lightingEffect.Parameters["ShadowMap"].SetValue(shadowMap);
 
         _spriteBatch.Begin(effect: _lightingEffect, blendState: BlendState.Additive);
