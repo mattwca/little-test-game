@@ -31,6 +31,8 @@ public class AttachedSystem : IUpdateSystem
             }
 
             var trackedEntityPosition = trackedEntity.GetComponent<PositionComponent>();
+            var trackedEntityRenderer = trackedEntity.GetComponent<RenderingComponent>();
+
             var attachedEntityPosition = entity.GetComponent<PositionComponent>();
             attachedEntityPosition.Position = trackedEntityPosition.Position + attachedComponent.Offset;
 
@@ -38,6 +40,12 @@ public class AttachedSystem : IUpdateSystem
             if (attachedEntityRenderer is not null)
             {
                 attachedEntityRenderer.DepthHeightOverride = trackedEntityPosition.Position.Y;
+
+                if (attachedComponent.CopyFlip)
+                {
+                    attachedEntityRenderer.FlipX = trackedEntityRenderer.FlipX;
+                    attachedEntityRenderer.FlipY = trackedEntityRenderer.FlipY;
+                }
             }
         }
     }

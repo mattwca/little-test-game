@@ -17,7 +17,7 @@ public class KeyboardHandler
     {
         var wasPressed = _previousKeyboardState.IsKeyDown(key);
         var isPressed = _currentKeyboardState.IsKeyDown(key);
-        return wasPressed && !isPressed;
+        return !wasPressed && isPressed;
     }
 
     public bool WasKeyReleased(Keys key)

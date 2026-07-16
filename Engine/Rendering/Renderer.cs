@@ -1,3 +1,4 @@
+using Engine.Configuration;
 using Engine.ECS;
 using Engine.Utils;
 using Microsoft.Xna.Framework.Content;
@@ -13,17 +14,22 @@ public class Renderer
 
     private readonly SpriteRenderer _spriteRenderer;
     private readonly ParticleRenderer _particleRenderer;
-
     private readonly Effect _spriteEffect;
 
-    public Renderer(SpriteBatch spriteBatch, EntityManager entityManager, ContentManager contentManager, Helper helper)
+    public Renderer(
+        SpriteBatch spriteBatch,
+        EntityManager entityManager,
+        ContentManager contentManager,
+        Helper helper,
+        GameConfiguration config
+    )
     {
         _spriteBatch = spriteBatch;
         _contentManager = contentManager;
         _helper = helper;
 
-        _spriteRenderer = new SpriteRenderer(contentManager, entityManager, spriteBatch);
-        _particleRenderer = new ParticleRenderer(contentManager, entityManager, spriteBatch);
+        _spriteRenderer = new SpriteRenderer(entityManager, spriteBatch, config);
+        _particleRenderer = new ParticleRenderer(contentManager, entityManager, spriteBatch, config);
 
         _spriteEffect = _contentManager.Load<Effect>("Effects/SpriteEffect");
     }

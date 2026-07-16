@@ -1,10 +1,11 @@
-﻿using Components;
+﻿using System;
+using Components;
 using Engine.Animation;
 using Engine.Components;
+using Engine.Configuration;
 using Engine.ECS;
 using Engine.Events;
 using Engine.Lighting;
-using Engine.Physics;
 using Engine.Rendering;
 using Engine.Systems;
 using Engine.Utils;
@@ -23,7 +24,7 @@ public class LittleTestGame : Game
     public LittleTestGame()
     {
         _graphics = new GraphicsDeviceManager(this);
-        _systemManager = new SystemManager();
+        _systemManager = new SystemManager(new GameConfiguration(3200, 3200));
 
         _graphics.PreferredBackBufferWidth = 800;
         _graphics.PreferredBackBufferHeight = 600;
@@ -88,13 +89,22 @@ public class LittleTestGame : Game
 
         _systemManager
             .EntityManager.CreateEntity("player")
-            .AddComponent(new PositionComponent(new Vector2(150, 50), 32, 32))
+            .AddComponent(new PositionComponent(new Vector2(400, 400), 32, 32))
             .AddComponent(new HeightComponent())
             .AddComponent(new RenderingComponent(Content.Load<Texture2D>("player"), Color.White, castsShadow: true))
             .AddComponent(new PlayerComponent())
             .AddComponent(new VisibilityComponent())
-            .AddComponent(new AnimationComponent("playerWalking", 30))
+            .AddComponent(new AnimationComponent("playerWalking", 10))
             .AddComponent(new BoundingBoxComponent(new Vector2(8, 16), 16, 16, false));
+
+        _systemManager
+            .EntityManager.CreateEntity("playerGun")
+            .AddComponent(new PositionComponent(new Vector2(410f, 420f), 32f, 16f))
+            .AddComponent(new VisibilityComponent())
+            .AddComponent(new AttachedComponent("player", new Vector2(0f, 15f), true))
+            .AddComponent(
+                new RenderingComponent(Content.Load<Texture2D>("gun"), Color.White, castsShadow: false, depthBias: 0.1f)
+            );
 
         _systemManager
             .EntityManager.CreateEntity("playerShadow")
@@ -117,12 +127,21 @@ public class LittleTestGame : Game
                     WallTileDefinitions.Definition,
                     new int[,]
                     {
-                        { 1, 1, 0, 0, 0, 1, 1, 1, 1, 1 },
-                        { 1, 1, 0, 0, 0, 1, 1, 1, 1, 1 },
-                        { 1, 1, 1, 1, 0, 0, 0, 0, 1, 1 },
-                        { 1, 1, 1, 1, 0, 0, 0, 0, 1, 1 },
-                        { 0, 0, 0, 0, 0, 0, 0, 1, 1, 1 },
-                        { 0, 0, 0, 0, 0, 0, 0, 1, 1, 1 },
+                        { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+                        { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+                        { 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1 },
+                        { 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1 },
+                        { 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1 },
+                        { 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1 },
+                        { 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1 },
+                        { 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1 },
+                        { 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1 },
+                        { 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1 },
+                        { 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1 },
+                        { 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1 },
+                        { 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1 },
+                        { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+                        { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
                     },
                     1
                 )

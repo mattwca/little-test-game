@@ -1,9 +1,7 @@
 using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
-using System.Threading.Tasks;
 using Engine.Components;
+using Engine.Configuration;
 using Engine.ECS;
 using Engine.Events;
 using Engine.Physics;
@@ -21,6 +19,7 @@ public class CollisionResolutionSystem : IUpdateSystem, IRenderSystem
     private readonly EntityManager _entityManager;
     private readonly ShapeRenderer _shapeRenderer;
     private readonly EventBus _eventBus;
+    private readonly GameConfiguration _gameConfiguration;
 
     private bool _isUpdatingQuadTree;
     private volatile QuadTree _quadTree;
@@ -30,7 +29,8 @@ public class CollisionResolutionSystem : IUpdateSystem, IRenderSystem
         StateManager stateManager,
         EntityManager entityManager,
         ShapeRenderer shapeRenderer,
-        EventBus eventBus
+        EventBus eventBus,
+        GameConfiguration gameConfiguration
     )
     {
         _spriteBatch = spriteBatch;
@@ -38,8 +38,9 @@ public class CollisionResolutionSystem : IUpdateSystem, IRenderSystem
         _entityManager = entityManager;
         _shapeRenderer = shapeRenderer;
         _eventBus = eventBus;
+        _gameConfiguration = gameConfiguration;
 
-        _quadTree = new QuadTree(800, 600);
+        _quadTree = new QuadTree(gameConfiguration.WorldWidth, gameConfiguration.WorldHeight);
         _isUpdatingQuadTree = false;
 
         BuildQuadTree();
@@ -181,7 +182,7 @@ public class CollisionResolutionSystem : IUpdateSystem, IRenderSystem
             typeof(PositionComponent)
         );
 
-        var newQuadTree = new QuadTree(800, 600);
+        var newQuadTree = new QuadTree(_gameConfiguration.WorldWidth, _gameConfiguration.WorldHeight);
 
         foreach (var entity in boundingBoxEntities)
         {

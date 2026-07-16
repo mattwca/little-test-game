@@ -1,28 +1,23 @@
 using System.Linq;
 using Engine.Components;
+using Engine.Configuration;
 using Engine.ECS;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace Engine.Rendering;
 
 public class SpriteRenderer
 {
-    /// <summary>
-    /// Max world height for layer depth calcs
-    /// </summary>
-    private const int MAX_WORLD_HEIGHT = 1000;
-
-    private readonly ContentManager _contentManager;
     private readonly EntityManager _entityManager;
     private readonly SpriteBatch _spriteBatch;
+    private readonly GameConfiguration _config;
 
-    public SpriteRenderer(ContentManager contentManager, EntityManager entityManager, SpriteBatch spriteBatch)
+    public SpriteRenderer(EntityManager entityManager, SpriteBatch spriteBatch, GameConfiguration config)
     {
-        _contentManager = contentManager;
         _entityManager = entityManager;
         _spriteBatch = spriteBatch;
+        _config = config;
     }
 
     public void RenderSprites(bool shadowCastersOnly)
@@ -55,7 +50,7 @@ public class SpriteRenderer
                     - (heightComponent is null ? Vector2.Zero : new Vector2(0, heightComponent.Z));
 
                 var depthZ = renderingComponent.DepthHeightOverride ?? positionComponent.Position.Y;
-                var layer = depthZ / MAX_WORLD_HEIGHT;
+                var layer = (depthZ + renderingComponent.DepthBias) / _config.WorldHeight;
 
                 var spriteEffect =
                     (renderingComponent.FlipX ? SpriteEffects.FlipHorizontally : SpriteEffects.None)

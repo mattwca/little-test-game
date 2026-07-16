@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 
 namespace Engine.Events;
@@ -10,8 +11,8 @@ namespace Engine.Events;
 /// </summary>
 public class EventBus
 {
-    private Dictionary<Type, List<IEvent>> _previousEvents;
-    private Dictionary<Type, List<IEvent>> _currentEvents;
+    private Dictionary<Type, List<Event>> _previousEvents;
+    private Dictionary<Type, List<Event>> _currentEvents;
 
     public EventBus()
     {
@@ -20,7 +21,7 @@ public class EventBus
     }
 
     public void Publish<T>(T gameEvent)
-        where T : IEvent
+        where T : Event
     {
         var eventType = typeof(T);
 
@@ -34,7 +35,7 @@ public class EventBus
     }
 
     public List<T> ReadAll<T>()
-        where T : IEvent
+        where T : Event
     {
         var eventType = typeof(T);
 

@@ -100,14 +100,20 @@ public class DodgeSystem : IUpdateSystem
         // Start dodges for any entities with a linked dodge event.
         foreach (var dodgeEvent in dodgeEvents)
         {
-            var hasComponent = dodgeEvent.Entity.HasComponent<DodgeComponent>();
-            if (hasComponent && !dodgeEvent.Entity.GetComponent<DodgeComponent>().CanDodge)
+            var entity = _entityManager.GetEntity(dodgeEvent.EntityId);
+            if (entity is null)
             {
                 continue;
             }
 
-            CreateOrUpdateDodgeParticleEmitter(dodgeEvent.Entity, dodgeEvent.Direction);
-            dodgeEvent.Entity.ReplaceComponent(new DodgeComponent(dodgeEvent));
+            var hasComponent = entity.HasComponent<DodgeComponent>();
+            if (hasComponent && !entity.GetComponent<DodgeComponent>().CanDodge)
+            {
+                continue;
+            }
+
+            CreateOrUpdateDodgeParticleEmitter(entity, dodgeEvent.Direction);
+            entity.ReplaceComponent(new DodgeComponent(dodgeEvent));
         }
     }
 
@@ -145,6 +151,8 @@ public class DodgeSystem : IUpdateSystem
             {
                 dodgeComponent.TimeRemainingSecs = 0f;
                 DisableDodgeParticleEmitter(entity);
+
+                dodgeComponent.DodgeEvent.OnFinished?.Invoke();
 
                 continue;
             }

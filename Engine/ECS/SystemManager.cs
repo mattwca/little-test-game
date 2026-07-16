@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Engine.Configuration;
 using Engine.Systems;
 using Microsoft.Xna.Framework;
 
@@ -25,7 +26,7 @@ public class SystemManager
     private readonly List<IRenderSystem> _renderSystems;
     private readonly StateManager _stateManager;
 
-    public SystemManager()
+    public SystemManager(GameConfiguration gameConfiguration)
     {
         _serviceCollection = new Dictionary<Type, object>();
 
@@ -34,6 +35,8 @@ public class SystemManager
 
         _stateManager = new StateManager();
         Register(_stateManager);
+
+        Register(gameConfiguration);
 
         _updateSystems = [];
         _renderSystems = [];

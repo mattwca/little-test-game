@@ -1,16 +1,12 @@
 using System;
-using System.Linq;
 using Components;
 using Engine.Components;
 using Engine.ECS;
 using Engine.Events;
 using Engine.Particles;
-using Engine.Physics;
-using Engine.Systems;
 using Engine.Utils;
 using Events;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Input;
 
 namespace Systems;
@@ -171,17 +167,28 @@ public class PlayerSystem : IUpdateSystem
             playerComponent.Direction = new Vector2(1, 0);
         }
 
-        if (Keyboard.GetState().IsKeyDown(Keys.Space) && heightComponent.Grounded)
+        if (_keyboardHandler.WasKeyPressed(Keys.Space) && heightComponent.Grounded)
         {
             heightComponent.ZVelocity = JUMP_IMPULSE;
         }
 
         if (_keyboardHandler.WasKeyPressed(Keys.LeftShift))
         {
-            _eventBus.Publish(new DodgeEvent(playerEntity, movementVector, 0.25f, 0.1f));
+            animationComponent.PlaybackSpeed = 10f;
+
+            _eventBus.Publish(
+                new DodgeEvent(
+                    playerEntity.Id,
+                    movementVector,
+                    0.25f,
+                    0.1f,
+                    () => animationComponent.PlaybackSpeed = 1f
+                )
+            );
         }
 
         animationComponent.Enabled = movementVector != Vector2.Zero;
+
         playerEntity.ReplaceComponent(
             new VelocityComponent(movementVector * (float)gameTime.ElapsedGameTime.TotalSeconds * 100)
         );

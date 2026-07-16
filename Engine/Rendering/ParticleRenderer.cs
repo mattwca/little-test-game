@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Engine.Components;
+using Engine.Configuration;
 using Engine.ECS;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
@@ -10,20 +11,22 @@ namespace Engine.Rendering;
 
 public class ParticleRenderer
 {
-    /// <summary>
-    /// Max world height for layer depth calcs
-    /// </summary>
-    private const int MAX_WORLD_HEIGHT = 1000;
-
     private readonly ContentManager _contentManager;
     private readonly EntityManager _entityManager;
     private readonly SpriteBatch _spriteBatch;
+    private readonly GameConfiguration _config;
 
-    public ParticleRenderer(ContentManager contentManager, EntityManager entityManager, SpriteBatch spriteBatch)
+    public ParticleRenderer(
+        ContentManager contentManager,
+        EntityManager entityManager,
+        SpriteBatch spriteBatch,
+        GameConfiguration config
+    )
     {
         _contentManager = contentManager;
         _entityManager = entityManager;
         _spriteBatch = spriteBatch;
+        _config = config;
     }
 
     public void RenderParticles(bool shadowCastersOnly)
@@ -67,7 +70,7 @@ public class ParticleRenderer
                 }
 
                 var depthZ = emitterComponent.RenderConfig?.OverrideDepthZ ?? emitterPosition.Position.Y;
-                var layer = depthZ / MAX_WORLD_HEIGHT;
+                var layer = depthZ / _config.WorldHeight;
 
                 var fadeOutValue = emitterComponent.ParticleType.FadeOut
                     ? (particle.Age / emitterComponent.SpawnConfig.LifespanSeconds * 128) / 128

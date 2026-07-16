@@ -3,8 +3,4 @@ using Microsoft.Xna.Framework;
 
 namespace Engine.Components;
 
-public class AttachedComponent(string trackingEntityId, Vector2 offset) : IComponent
-{
-    public string TrackingEntityId { get; set; } = trackingEntityId;
-    public Vector2 Offset { get; set; } = offset;
-}
+public record AttachedComponent(string TrackingEntityId, Vector2 Offset, bool CopyFlip = false) : IComponent;

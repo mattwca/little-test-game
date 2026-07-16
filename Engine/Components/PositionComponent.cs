@@ -12,9 +12,9 @@ public class PositionComponent : IComponent
 
     public Vector2 Centre => Position + new Vector2(Width / 2f, Height / 2f);
 
-    public PositionComponent(Vector2 position, float width = 0f, float height = 0f, float rotation = 0f)
+    public PositionComponent(Vector2? position = null, float width = 0f, float height = 0f, float rotation = 0f)
     {
-        Position = position;
+        Position = position ?? Vector2.Zero;
         Rotation = rotation;
         Width = width;
         Height = height;
